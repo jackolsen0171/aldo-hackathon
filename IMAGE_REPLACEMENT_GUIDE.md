@@ -10,10 +10,12 @@ Create the following folder structure in your `public` directory:
 public/
 ├── images/
 │   ├── cher-avatar.png          # Main Cher avatar image
+│   ├── cher-chat-avatar.png     # Cher chat avatar (smaller)
 │   ├── closet.png               # Closet background image
 │   ├── icons/
 │   │   ├── save-icon.png        # Save button icon
-│   │   └── trash-icon.png       # Delete/clear button icon
+│   │   ├── trash-icon.png       # Delete/clear button icon
+│   │   └── send-icon.png        # Chat send button icon
 │   ├── clothing/
 │   │   ├── hats/
 │   │   │   ├── 1.png            # Hat images (full size)
@@ -165,21 +167,27 @@ Clear All
 <img src={`/images/clothing/shoes/${getCurrentItem('shoes').id}.png`} alt={getCurrentItem('shoes').name} className="clothing-image" />
 ```
 
-#### Selection Panel Thumbnails (Lines ~175-210)
-**REPLACE each selection item:**
+### 3. CherChatPanel.js (`src/components/CherChatPanel.js`)
+
+#### Cher Chat Avatar (Line ~45)
+**REPLACE:**
 ```jsx
-<span className="selection-icon">🎩</span>
-<div className="selection-details">
-  <div className="selection-name">{getCurrentItem('hat').name}</div>
-  <div className="selection-color">{getCurrentItem('hat').color}</div>
-</div>
+<div className="cher-avatar-placeholder">👩‍🦱</div>
 ```
 **WITH:**
 ```jsx
-<img src={`/images/clothing/hats/${getCurrentItem('hat').id}-thumb.png`} alt={getCurrentItem('hat').name} className="selection-thumbnail" />
+<img src="/images/cher-chat-avatar.png" alt="Cher" className="cher-avatar-img" />
 ```
 
-**Repeat for tops, bottoms, and shoes with their respective paths.**
+#### Send Button Icon (Line ~85)
+**REPLACE:**
+```jsx
+➤
+```
+**WITH:**
+```jsx
+<img src="/images/icons/send-icon.png" alt="Send" className="send-icon" />
+```
 
 ## CSS Classes Already Added
 

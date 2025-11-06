@@ -24,13 +24,8 @@ const HomePage = ({ onNavigate }) => {
 
       {/* Main Content */}
       <main className="home-main">
-        {/* Left Side - Empty for now */}
+        {/* Left Side - Cher Avatar */}
         <div className="home-left">
-          {/* Future space for additional content */}
-        </div>
-
-        {/* Center - Cher Avatar */}
-        <div className="home-center">
           <div className="avatar-container">
             <div className="avatar-placeholder">
               <div className="avatar-image">

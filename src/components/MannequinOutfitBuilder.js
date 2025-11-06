@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CherChatPanel from './CherChatPanel';
 import './MannequinOutfitBuilder.css';
 
 const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
@@ -114,7 +115,7 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
         <div className="mannequin-container">
           <div className="mannequin">
             {/* Hat Section */}
-            <div className="clothing-section hat-section">
+            <div className="clothing-section hat-section" data-body-part="HEAD">
               <button 
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('hat', 'prev')}
@@ -141,11 +142,8 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
               </button>
             </div>
 
-            {/* Mannequin Head */}
-            <div className="mannequin-head"></div>
-
             {/* Top Section */}
-            <div className="clothing-section top-section">
+            <div className="clothing-section top-section" data-body-part="CHEST">
               <button 
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('top', 'prev')}
@@ -172,11 +170,8 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
               </button>
             </div>
 
-            {/* Mannequin Body */}
-            <div className="mannequin-body"></div>
-
             {/* Bottom Section */}
-            <div className="clothing-section bottom-section">
+            <div className="clothing-section bottom-section" data-body-part="LEGS">
               <button 
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('bottom', 'prev')}
@@ -203,11 +198,8 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
               </button>
             </div>
 
-            {/* Mannequin Legs */}
-            <div className="mannequin-legs"></div>
-
             {/* Shoes Section */}
-            <div className="clothing-section shoes-section">
+            <div className="clothing-section shoes-section" data-body-part="FEET">
               <button 
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('shoes', 'prev')}
@@ -236,51 +228,13 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
           </div>
         </div>
 
-        {/* Right Side - Current Selections Summary */}
-        <div className="selections-panel">
-          <h3>Current Selection</h3>
-          <div className="selections-list">
-            <div className="selection-item">
-              {/* TODO: REPLACE WITH ACTUAL HAT THUMBNAIL IMAGE */}
-              {/* Replace span with: <img src={`/images/clothing/hats/${getCurrentItem('hat').id}-thumb.png`} alt={getCurrentItem('hat').name} className="selection-thumbnail" /> */}
-              <span className="selection-icon">🎩</span>
-              <div className="selection-details">
-                {/* TODO: REMOVE TEXT - Keep only image */}
-                <div className="selection-name">{getCurrentItem('hat').name}</div>
-                <div className="selection-color">{getCurrentItem('hat').color}</div>
-              </div>
-            </div>
-            <div className="selection-item">
-              {/* TODO: REPLACE WITH ACTUAL TOP THUMBNAIL IMAGE */}
-              {/* Replace span with: <img src={`/images/clothing/tops/${getCurrentItem('top').id}-thumb.png`} alt={getCurrentItem('top').name} className="selection-thumbnail" /> */}
-              <span className="selection-icon">👕</span>
-              <div className="selection-details">
-                {/* TODO: REMOVE TEXT - Keep only image */}
-                <div className="selection-name">{getCurrentItem('top').name}</div>
-                <div className="selection-color">{getCurrentItem('top').color}</div>
-              </div>
-            </div>
-            <div className="selection-item">
-              {/* TODO: REPLACE WITH ACTUAL BOTTOM THUMBNAIL IMAGE */}
-              {/* Replace span with: <img src={`/images/clothing/bottoms/${getCurrentItem('bottom').id}-thumb.png`} alt={getCurrentItem('bottom').name} className="selection-thumbnail" /> */}
-              <span className="selection-icon">👖</span>
-              <div className="selection-details">
-                {/* TODO: REMOVE TEXT - Keep only image */}
-                <div className="selection-name">{getCurrentItem('bottom').name}</div>
-                <div className="selection-color">{getCurrentItem('bottom').color}</div>
-              </div>
-            </div>
-            <div className="selection-item">
-              {/* TODO: REPLACE WITH ACTUAL SHOES THUMBNAIL IMAGE */}
-              {/* Replace span with: <img src={`/images/clothing/shoes/${getCurrentItem('shoes').id}-thumb.png`} alt={getCurrentItem('shoes').name} className="selection-thumbnail" /> */}
-              <span className="selection-icon">👠</span>
-              <div className="selection-details">
-                {/* TODO: REMOVE TEXT - Keep only image */}
-                <div className="selection-name">{getCurrentItem('shoes').name}</div>
-                <div className="selection-color">{getCurrentItem('shoes').color}</div>
-              </div>
-            </div>
-          </div>
+        {/* Right Side - Cher Chat Panel */}
+        <div className="chat-panel">
+          <CherChatPanel 
+            selectedTrip={selectedTrip}
+            selectedOutfit={selectedOutfit}
+            currentItems={currentItems}
+          />
         </div>
       </div>
     </div>

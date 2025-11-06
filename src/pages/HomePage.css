@@ -50,31 +50,28 @@
 /* Main Content */
 .home-main {
   display: grid;
-  grid-template-columns: 1fr 2fr 2fr;
+  grid-template-columns: 1fr 3fr;
   height: calc(100vh - 80px);
-  padding: 20px;
-  gap: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 0;
+  gap: 0;
+  width: 100%;
+  margin: 0;
 }
 
-/* Left Side */
+/* Left Side - Cher Avatar */
 .home-left {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 15px;
-  padding: 20px;
-  /* Reserved for future content */
-}
-
-/* Center - Avatar */
-.home-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Center - Avatar (now moved to left) */
+.home-center {
+  /* This section is now unused - avatar moved to home-left */
+  display: none;
 }
 
 .avatar-container {
@@ -82,16 +79,18 @@
 }
 
 .avatar-placeholder {
-  width: 300px;
-  height: 400px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 350px;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .avatar-image {
@@ -119,25 +118,72 @@
 
 /* Right Side - Closet */
 .home-right {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #D2691E 100%);
+  padding: 0;
   overflow-y: auto;
+  position: relative;
+  /* Closet wood texture effect */
+  background-image: 
+    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px),
+    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Closet door handles */
+.home-right::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  width: 10px;
+  height: 50px;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  border-radius: 5px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+  transform: translateY(-50%);
+}
+
+/* Closet door frame */
+.home-right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 6px solid #654321;
+  border-radius: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 
 .closet-container {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  margin: 30px;
+  border-radius: 15px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+  /* Closet interior effect */
+  border: 2px solid #8B4513;
+  z-index: 2;
 }
 
 .closet-title {
   color: #2c3e50;
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   margin-bottom: 20px;
   text-align: center;
-  font-weight: 300;
+  font-weight: 600;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 15px 15px 0 0;
+  border-bottom: 2px solid #654321;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .closet-content {
@@ -145,20 +191,51 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 20px;
+  position: relative;
 }
 
 .closet-image-placeholder {
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-  border-radius: 15px;
-  padding: 30px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-radius: 10px;
+  padding: 20px;
   text-align: center;
   color: white;
-  min-height: 150px;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  position: relative;
+  border: 2px solid #1a252f;
+  /* Closet rod effect */
+}
+
+.closet-image-placeholder::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 25px;
+  right: 25px;
+  height: 10px;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  border-radius: 5px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  z-index: 3;
+}
+
+.closet-image-placeholder::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  right: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #95a5a6, #bdc3c7);
+  border-radius: 10px;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
 
 .closet-icon {
@@ -185,48 +262,76 @@
 
 .outfits-list h3 {
   color: #2c3e50;
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  font-weight: 500;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+  padding: 15px;
+  background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+  border-radius: 10px;
+  border: 1px solid #95a5a6;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .outfits-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 300px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  max-height: 400px;
   overflow-y: auto;
-  padding-right: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  border: 1px solid #bdc3c7;
 }
 
 .outfit-item {
   background: white;
   border-radius: 10px;
-  padding: 12px;
+  padding: 10px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   cursor: pointer;
   border: 2px solid transparent;
+  min-height: 120px;
+  /* Hanging outfit effect */
+  position: relative;
+}
+
+.outfit-item::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 10px;
+  background: #34495e;
+  border-radius: 0 0 10px 10px;
+  /* Hanger hook */
 }
 
 .outfit-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   border-color: #3498db;
 }
 
 .outfit-thumbnail {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, #ff6b6b, #ee5a24);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid #fff;
 }
 
 .outfit-icon {
@@ -235,19 +340,22 @@
 }
 
 .outfit-info {
-  flex: 1;
+  text-align: center;
+  width: 100%;
 }
 
 .outfit-trip {
   font-weight: 600;
   color: #2c3e50;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   margin-bottom: 2px;
+  line-height: 1.2;
 }
 
 .outfit-number {
   color: #7f8c8d;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 500;
 }
 
 /* Image Replacements - TODO: Use these classes when replacing emojis with images */
@@ -295,18 +403,24 @@
 @media (max-width: 1200px) {
   .home-main {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto 1fr;
     height: auto;
-    gap: 15px;
+    gap: 0;
   }
   
   .home-left {
-    display: none; /* Hide left panel on smaller screens */
+    padding: 20px;
+    height: 300px;
   }
   
   .avatar-placeholder {
-    width: 250px;
-    height: 350px;
+    width: 200px;
+    height: 280px;
+  }
+  
+  .outfits-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
   }
 }
 
@@ -326,12 +440,42 @@
     border-bottom-color: #3498db;
   }
   
+  .home-left {
+    padding: 15px;
+    height: 250px;
+  }
+  
   .avatar-placeholder {
-    width: 200px;
-    height: 280px;
+    width: 150px;
+    height: 200px;
   }
   
   .avatar-icon {
-    font-size: 3rem;
+    font-size: 2.5rem;
+  }
+  
+  .closet-container {
+    margin: 10px;
+  }
+  
+  .closet-title {
+    font-size: 1.8rem;
+    padding: 15px;
+  }
+  
+  .outfits-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    max-height: 300px;
+  }
+  
+  .outfit-item {
+    min-height: 100px;
+    padding: 8px;
+  }
+  
+  .outfit-thumbnail {
+    width: 50px;
+    height: 50px;
   }
 }
