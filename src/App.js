@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import HomePage from './pages/HomePage';
 import CombinedWorkshopPage from './pages/CombinedWorkshopPage';
+import ClosetPage from './pages/ClosetPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
@@ -13,6 +14,8 @@ function App() {
         return <HomePage onNavigate={setCurrentPage} />;
       case 'combined-workshop':
         return <CombinedWorkshopPage onNavigate={setCurrentPage} />;
+      case 'closet':
+        return <ClosetPage onNavigate={setCurrentPage} />;
       default:
         return <HomePage onNavigate={setCurrentPage} />;
     }

@@ -1,4 +1,5 @@
 import React from 'react';
+import InteractiveCloset from '../components/InteractiveCloset';
 import './HomePage.css';
 
 const HomePage = ({ onNavigate }) => {
@@ -40,47 +41,11 @@ const HomePage = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Right Side - Closet */}
+        {/* Right Side - Interactive Closet */}
         <div className="home-right">
-          <div className="closet-container">
-            <h2 className="closet-title">My Closet</h2>
-            <div className="closet-content">
-              <div className="closet-image-placeholder">
-                {/* TODO: REPLACE WITH CLOSET IMAGE */}
-                {/* Replace this div with: <img src="/images/closet.png" alt="Closet" className="closet-img" /> */}
-                <div className="closet-icon">🚪</div>
-                {/* TODO: REMOVE TEXT BELOW - Replace with image only */}
-                <p>Closet Image</p>
-                <small>(Upload closet image)</small>
-              </div>
-              
-              <div className="outfits-list">
-                <h3>All Saved Outfits</h3>
-                <div className="outfits-grid">
-                  {/* Sample outfit entries */}
-                  {[
-                    { trip: 'Business Trip', outfit: 1 },
-                    { trip: 'Business Trip', outfit: 2 },
-                    { trip: 'Weekend Getaway', outfit: 1 },
-                    { trip: 'Date Night', outfit: 1 },
-                    { trip: 'Conference', outfit: 1 },
-                    { trip: 'Conference', outfit: 2 },
-                  ].map((item, index) => (
-                    <div key={index} className="outfit-item">
-                      <div className="outfit-thumbnail">
-                        {/* TODO: REPLACE WITH OUTFIT THUMBNAIL IMAGE */}
-                        {/* Replace span with: <img src="/images/outfits/outfit-thumbnail.png" alt="Outfit" className="outfit-thumbnail-img" /> */}
-                        <span className="outfit-icon">👗</span>
-                      </div>
-                      <div className="outfit-info">
-                        <div className="outfit-trip">{item.trip}</div>
-                        <div className="outfit-number">Outfit {item.outfit}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <InteractiveCloset onClick={() => onNavigate('closet')} />
+          <div className="closet-instructions">
+            <p>Click on the closet to explore your wardrobe!</p>
           </div>
         </div>
       </main>
