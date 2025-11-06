@@ -9,7 +9,7 @@ import ChatToggleButton from './ChatToggleButton';
 import { initialAppState, mockTrips } from '../data/mockData';
 import './OutfitPlannerLayout.css';
 
-const OutfitPlannerLayout = () => {
+const OutfitPlannerLayout = ({ onNavigate }) => {
     // Basic state management using React useState
     const [isChatPanelOpen, setIsChatPanelOpen] = useState(initialAppState.isChatPanelOpen);
     const [selectedTrip, setSelectedTrip] = useState(initialAppState.selectedTrip);
@@ -73,6 +73,16 @@ const OutfitPlannerLayout = () => {
 
     return (
         <div className="outfit-planner-layout">
+            {/* Back to Home Button */}
+            {onNavigate && (
+                <button 
+                    className="back-to-home-btn"
+                    onClick={() => onNavigate('home')}
+                >
+                    ← Back to Home
+                </button>
+            )}
+            
             {/* Left Sidebar - Saved Trips */}
             <div className="layout-sidebar">
                 <SavedTripsSidebar

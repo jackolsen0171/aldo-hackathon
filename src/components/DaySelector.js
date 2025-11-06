@@ -22,9 +22,9 @@ const DaySelector = ({
                     className={`day-tab ${currentSelectedDay === i ? 'selected' : ''}`}
                     onClick={() => handleDayClick(i)}
                     aria-pressed={currentSelectedDay === i}
-                    aria-label={`Select Day ${i}`}
+                    aria-label={`Select Outfit ${i}`}
                 >
-                    Day {i}
+                    Outfit {i}
                 </button>
             );
         }

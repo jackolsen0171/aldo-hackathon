@@ -1,0 +1,407 @@
+.mannequin-builder {
+  flex: 1;
+  padding: 20px;
+  background: #f8f9fa;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.builder-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 30px;
+  min-height: calc(100vh - 200px);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 40px; /* Add bottom padding to prevent cutoff */
+}
+
+/* Left Panel - Outfit Info */
+.outfit-info-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.outfit-details h3 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.trip-info, .outfit-info {
+  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #34495e;
+}
+
+.trip-info strong, .outfit-info strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.outfit-name-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.outfit-name-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.outfit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: auto;
+}
+
+.save-btn, .clear-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.save-btn {
+  background: #27ae60;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #219a52;
+  transform: translateY(-2px);
+}
+
+.clear-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.clear-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Center Panel - Mannequin */
+.mannequin-container {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mannequin {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+}
+
+/* Mannequin Body Parts */
+.mannequin-head {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0c674, #e6b85c);
+  border: 3px solid #2c3e50;
+  position: relative;
+  z-index: 1;
+}
+
+.mannequin-body {
+  width: 120px;
+  height: 150px;
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  border-radius: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.mannequin-legs {
+  width: 100px;
+  height: 120px;
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  border-radius: 0 0 15px 15px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Clothing Sections */
+.clothing-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  z-index: 2;
+}
+
+.hat-section {
+  margin-bottom: -10px;
+}
+
+.top-section {
+  margin: -20px 0;
+}
+
+.bottom-section {
+  margin: -20px 0;
+}
+
+.shoes-section {
+  margin-top: -10px;
+}
+
+/* Navigation Arrows */
+.nav-arrow {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-arrow:hover {
+  background: #2980b9;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.nav-arrow:active {
+  transform: scale(0.95);
+}
+
+/* Clothing Items */
+.clothing-item {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 15px;
+  min-width: 180px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.clothing-item:hover {
+  border-color: #3498db;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.item-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.item-color {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+/* Right Panel - Selections Summary */
+.selections-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.selections-panel h3 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.selections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.selection-item {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.selection-item:hover {
+  border-color: #3498db;
+  background: #f0f8ff;
+}
+
+.selection-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.selection-details {
+  flex: 1;
+}
+
+.selection-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  margin-bottom: 3px;
+}
+
+.selection-color {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+}
+
+/* Image Replacements - TODO: Use these classes when replacing emojis with images */
+.button-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  object-fit: contain;
+}
+
+.clothing-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.selection-thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+/* When removing text, adjust these containers */
+.item-display.image-only {
+  justify-content: center;
+}
+
+.selection-item.image-only {
+  justify-content: center;
+  padding: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .builder-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: 20px;
+    min-height: auto;
+    padding-bottom: 60px; /* More padding on mobile */
+  }
+  
+  .outfit-info-panel, .selections-panel {
+    padding: 20px;
+  }
+  
+  .mannequin-container {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mannequin-builder {
+    padding: 15px;
+    padding-bottom: 80px; /* Extra bottom padding on mobile */
+  }
+  
+  .builder-content {
+    gap: 15px;
+    padding-bottom: 80px;
+  }
+  
+  .clothing-section {
+    gap: 10px;
+  }
+  
+  .clothing-item {
+    min-width: 150px;
+    padding: 12px;
+  }
+  
+  .nav-arrow {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  
+  .mannequin-head {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .mannequin-body {
+    width: 100px;
+    height: 120px;
+  }
+  
+  .mannequin-legs {
+    width: 80px;
+    height: 100px;
+  }
+  
+  .item-icon {
+    font-size: 1.5rem;
+  }
+  
+  .selection-icon {
+    font-size: 1.2rem;
+  }
+}
