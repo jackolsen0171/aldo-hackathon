@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-import SavedTripsSidebar from './SavedTripsSidebar';
-import DaySelector from './DaySelector';
-import OutfitVisualization from './OutfitVisualization';
-import ClothingCategories from './ClothingCategories';
-import SlidingChatPanel from './SlidingChatPanel';
 import ChatWidgetPanel from './ChatWidgetPanel';
 import ChatToggleButton from './ChatToggleButton';
 import { initialAppState, mockTrips } from '../data/mockData';
@@ -85,7 +80,7 @@ const OutfitPlannerLayout = ({ onNavigate }) => {
     };
 
     return (
-        <div className="outfit-planner-layout">
+        <div className="outfit-planner-layout fullscreen-chat">
             {/* Back to Home Button */}
             {onNavigate && (
                 <button
@@ -96,59 +91,14 @@ const OutfitPlannerLayout = ({ onNavigate }) => {
                 </button>
             )}
 
-            {/* Left Sidebar - Saved Trips */}
-            <div className="layout-sidebar">
-                <SavedTripsSidebar
-                    trips={trips}
-                    selectedTrip={selectedTrip}
-                    onTripSelect={handleTripSelect}
-                    onNewTrip={handleNewTrip}
-                />
-            </div>
-
-            {/* Main Content Area */}
-            <div className="layout-main">
-                {/* Day Selection */}
-                <div className="day-selection-section">
-                    <DaySelector
-                        selectedDay={selectedDay}
-                        totalDays={currentTrip?.totalDays || 5}
-                        onDaySelect={handleDaySelect}
-                    />
+            {/* Full Screen Chat Interface with AI Integration */}
+            <div className="fullscreen-chat-container">
+                <div className="chat-header">
+                    <h1>🤖 AI Outfit Assistant</h1>
+                    <p>Tell me about your event, trip, or occasion and I'll help you plan the perfect outfits!</p>
                 </div>
-
-                {/* Outfit Visualization */}
-                <div className="outfit-visualization-section">
-                    <OutfitVisualization
-                        selectedItems={selectedItems}
-                        outfitName={currentOutfit?.name || "New Outfit"}
-                        onSaveOutfit={handleSaveOutfit}
-                        onOutfitNameChange={handleOutfitNameChange}
-                    />
-                </div>
-
-                {/* Clothing Categories */}
-                <div className="clothing-categories-section">
-                    <ClothingCategories
-                        selectedItems={selectedItems}
-                        onItemSelect={handleItemSelect}
-                    />
-                </div>
-            </div>
-
-            {/* Chat Panel Toggle Button */}
-            <ChatToggleButton
-                isOpen={isChatPanelOpen}
-                onClick={toggleChatPanel}
-            />
-
-            {/* Sliding AI Chat Panel */}
-            <SlidingChatPanel
-                isOpen={isChatPanelOpen}
-                onClose={closeChatPanel}
-            >
                 <ChatWidgetPanel />
-            </SlidingChatPanel>
+            </div>
         </div>
     );
 };

@@ -1,0 +1,31 @@
+sku,name,category,tags,weather_suitability,price,colors,layering,formality,notes
+SKU001,Classic White T-Shirt,Topwear,"casual, breathable, summer",warm,25,white,base,casual,Essential lightweight cotton tee for everyday wear.
+SKU002,Blue Denim Jeans,Bottomwear,"versatile, durable",mild,60,blue,base,casual,Straight-fit jeans suitable for casual and semi-casual settings.
+SKU003,Black Blazer,Outerwear,"formal, structured",mild,120,black,mid,formal,Tailored blazer ideal for business or formal occasions.
+SKU004,Grey Wool Coat,Outerwear,"winter, formal",cold,180,grey,outer,formal,Heavy wool coat for winter commutes and dressy events.
+SKU005,Rainproof Windbreaker,Outerwear,"rainproof, sporty","rain, cold",95,navy,outer,casual,Lightweight waterproof jacket suitable for travel and outdoor wear.
+SKU006,Chino Pants,Bottomwear,"smart, breathable",mild,55,khaki,base,smart-casual,Cotton-blend chinos ideal for office or travel.
+SKU007,Silk Blouse,Topwear,"elegant, lightweight",warm,70,cream,base,formal,Flowy silk blouse for formal dinners or professional wear.
+SKU008,Wool Turtleneck,Topwear,"warm, cozy",cold,65,charcoal,mid,smart-casual,Classic knit turtleneck perfect for layering in winter.
+SKU009,Pleated Midi Skirt,Bottomwear,"feminine, breezy",warm,50,beige,base,smart-casual,"Versatile skirt for brunch, dates, or business-casual outfits."
+SKU010,Waterproof Hiking Boots,Footwear,"outdoor, sturdy","rain, cold",110,brown,base,casual,Traction-heavy boots for hiking and outdoor trips.
+SKU011,White Sneakers,Footwear,"minimalist, travel-friendly",mild,85,white,base,casual,Comfortable sneakers that pair with nearly any outfit.
+SKU012,Leather Dress Shoes,Footwear,"business, polished",mild,130,black,base,formal,Classic lace-up oxfords for professional occasions.
+SKU013,Lightweight Puffer Jacket,Outerwear,"insulated, travel",cold,100,olive,outer,casual,Compressible down jacket suitable for travel layering.
+SKU014,Linen Button-Up Shirt,Topwear,"breathable, resort",warm,45,light blue,base,smart-casual,Ideal for vacations or outdoor lunches.
+SKU015,Athletic Joggers,Bottomwear,"sporty, relaxed",mild,40,dark grey,base,casual,Soft fleece joggers for lounging or light workouts.
+SKU016,Cocktail Dress,Dresses,"elegant, evening",warm,150,red,base,formal,"Satin dress ideal for parties, galas, or date nights."
+SKU017,Parka with Fur Hood,Outerwear,"winterproof, insulated",cold,220,dark green,outer,casual,Extreme-cold parka for outdoor adventures.
+SKU018,Wool Scarf,Accessories,"warm, cozy",cold,35,burgundy,accessory,casual,Soft woven scarf for layering in winter.
+SKU019,Sun Hat,Accessories,"summer, UV-protection",warm,25,beige,accessory,casual,Wide-brimmed hat ideal for travel and beachwear.
+SKU020,Denim Jacket,Outerwear,"timeless, rugged",mild,75,blue,outer,casual,Great transitional jacket that pairs with dresses or jeans.
+SKU021,Pencil Skirt,Bottomwear,"office, fitted",mild,60,black,base,formal,Professional skirt for work or conferences.
+SKU022,Puffer Vest,Outerwear,"transitional, lightweight",cold,65,black,outer,casual,Perfect layering piece for unpredictable weather.
+SKU023,Graphic Hoodie,Topwear,"cozy, trendy",mild,50,black,mid,casual,Relaxed hoodie for casual weekends or travel.
+SKU024,Business Suit Set,Outerwear,"professional, tailored",mild,250,navy,outer,formal,Coordinated blazer and trousers for meetings and conferences.
+SKU025,Maxi Dress,Dresses,"boho, flowy",warm,80,floral,base,smart-casual,Versatile for beach trips or summer events.
+SKU026,Padded Sports Bra,Topwear,"athletic, breathable",warm,30,grey,base,casual,"Suitable for yoga, gym, or outdoor activity."
+SKU027,Leggings,Bottomwear,"stretch, comfort",mild,35,black,base,casual,Essential stretch leggings for travel or workouts.
+SKU028,Wool Beanie,Accessories,"warm, winter",cold,20,dark grey,accessory,casual,Knit cap to retain warmth in cold weather.
+SKU029,Waterproof Trench Coat,Outerwear,"rainproof, elegant","rain, cold",150,beige,outer,formal,Classic raincoat that maintains style in poor weather.
+SKU030,Formal Heels,Footwear,"elegant, formal",mild,90,nude,base,formal,Pumps suitable for weddings or professional events.

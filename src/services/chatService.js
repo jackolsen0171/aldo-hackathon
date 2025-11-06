@@ -34,7 +34,7 @@ class ChatService {
             }
 
             // Check if this is an outfit planning response with structured data
-            const messageType = result.data.eventContext ? 'outfit_planning' : 'general';
+            const messageType = result.data.eventContext ? 'event_extraction' : 'general';
 
             return {
                 success: true,
@@ -43,7 +43,9 @@ class ChatService {
                 timestamp: result.data.timestamp || new Date().toISOString(),
                 messageType: messageType,
                 eventContext: result.data.eventContext || null,
-                needsClarification: result.data.needsClarification || null
+                needsClarification: result.data.needsClarification || null,
+                extractionConfidence: result.data.extractionConfidence || null,
+                pipelineStage: result.data.pipelineStage || null
             };
 
         } catch (error) {

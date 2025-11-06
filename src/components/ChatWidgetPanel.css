@@ -1,10 +1,23 @@
-/* Chat Widget Panel - Optimized for sliding panel */
+/* Chat Widget Panel - Optimized for sliding panel and fullscreen */
 .chat-widget-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   background: white;
   overflow: hidden;
+}
+
+/* Fullscreen optimizations */
+.fullscreen-chat-container .chat-widget-panel {
+  border-radius: 0;
+  box-shadow: none;
+  height: 100%;
+}
+
+.fullscreen-chat-container .chat-panel-actions {
+  background: #f8f9fa;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e9ecef;
 }
 
 /* Panel Actions */

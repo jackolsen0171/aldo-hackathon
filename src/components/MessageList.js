@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import EventDetailsForm from './EventDetailsForm';
 import './MessageList.css';
 
-const MessageList = ({ messages, loading }) => {
+const MessageList = ({ messages, loading, onEventConfirm, onEventCancel }) => {
     const messagesEndRef = useRef(null);
 
     // Auto-scroll to bottom when new messages arrive
@@ -37,12 +37,14 @@ const MessageList = ({ messages, loading }) => {
                                     extractionConfidence={message.extractionConfidence}
                                     needsClarification={message.needsClarification}
                                     onConfirm={(confirmedData) => {
-                                        console.log('Event details confirmed:', confirmedData);
-                                        // This will be connected to the pipeline service
+                                        if (onEventConfirm) {
+                                            onEventConfirm(confirmedData, message.id);
+                                        }
                                     }}
                                     onCancel={() => {
-                                        console.log('Event details cancelled');
-                                        // This will be connected to the pipeline service
+                                        if (onEventCancel) {
+                                            onEventCancel(message.id);
+                                        }
                                     }}
                                     loading={message.pipelineLoading || false}
                                 />
