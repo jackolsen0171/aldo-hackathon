@@ -1,131 +1,19 @@
-import React, { useState } from 'react';
-import SavedTripsSidebar from './SavedTripsSidebar';
-import DaySelector from './DaySelector';
-import OutfitVisualization from './OutfitVisualization';
-import ClothingCategories from './ClothingCategories';
-import SlidingChatPanel from './SlidingChatPanel';
+import React from 'react';
 import ChatWidgetPanel from './ChatWidgetPanel';
-import ChatToggleButton from './ChatToggleButton';
-import { initialAppState, mockTrips } from '../data/mockData';
 import './OutfitPlannerLayout.css';
 
 const OutfitPlannerLayout = () => {
-    // Basic state management using React useState
-    const [isChatPanelOpen, setIsChatPanelOpen] = useState(initialAppState.isChatPanelOpen);
-    const [selectedTrip, setSelectedTrip] = useState(initialAppState.selectedTrip);
-    const [selectedDay, setSelectedDay] = useState(initialAppState.selectedDay);
-    const [trips] = useState(mockTrips);
-    const [selectedItems, setSelectedItems] = useState({});
-
-    // Get current trip data
-    const currentTrip = trips.find(trip => trip.id === selectedTrip);
-    const currentOutfit = currentTrip?.outfits?.[selectedDay];
-
-    // Methods for toggling chat panel and switching selections
-    const toggleChatPanel = () => {
-        setIsChatPanelOpen(prev => !prev);
-    };
-
-    const handleTripSelect = (tripId) => {
-        setSelectedTrip(tripId);
-        // Reset to day 1 when switching trips
-        setSelectedDay(1);
-        // Clear selected items when switching trips
-        setSelectedItems({});
-    };
-
-    const handleDaySelect = (dayNumber) => {
-        setSelectedDay(dayNumber);
-        // Load outfit items for the selected day if they exist
-        const dayOutfit = currentTrip?.outfits?.[dayNumber];
-        if (dayOutfit?.items) {
-            setSelectedItems(dayOutfit.items);
-        } else {
-            setSelectedItems({});
-        }
-    };
-
-    const handleNewTrip = () => {
-        // Placeholder for new trip creation
-        console.log('New trip creation - to be implemented');
-    };
-
-    const handleItemSelect = (category, item) => {
-        setSelectedItems(prev => ({
-            ...prev,
-            [category]: item
-        }));
-    };
-
-    const handleSaveOutfit = (outfitData) => {
-        // Placeholder for outfit saving
-        console.log('Save outfit:', outfitData);
-    };
-
-    const handleOutfitNameChange = (newName) => {
-        // Placeholder for outfit name change
-        console.log('Outfit name changed to:', newName);
-    };
-
-    const closeChatPanel = () => {
-        setIsChatPanelOpen(false);
-    };
 
     return (
-        <div className="outfit-planner-layout">
-            {/* Left Sidebar - Saved Trips */}
-            <div className="layout-sidebar">
-                <SavedTripsSidebar
-                    trips={trips}
-                    selectedTrip={selectedTrip}
-                    onTripSelect={handleTripSelect}
-                    onNewTrip={handleNewTrip}
-                />
-            </div>
-
-            {/* Main Content Area */}
-            <div className="layout-main">
-                {/* Day Selection */}
-                <div className="day-selection-section">
-                    <DaySelector
-                        selectedDay={selectedDay}
-                        totalDays={currentTrip?.totalDays || 5}
-                        onDaySelect={handleDaySelect}
-                    />
+        <div className="outfit-planner-layout fullscreen-chat">
+            {/* Full Screen Chat Interface */}
+            <div className="fullscreen-chat-container">
+                <div className="chat-header">
+                    <h1>🤖 AI Outfit Assistant</h1>
+                    <p>Tell me about your event, trip, or occasion and I'll help you plan the perfect outfits!</p>
                 </div>
-
-                {/* Outfit Visualization */}
-                <div className="outfit-visualization-section">
-                    <OutfitVisualization
-                        selectedItems={selectedItems}
-                        outfitName={currentOutfit?.name || "New Outfit"}
-                        onSaveOutfit={handleSaveOutfit}
-                        onOutfitNameChange={handleOutfitNameChange}
-                    />
-                </div>
-
-                {/* Clothing Categories */}
-                <div className="clothing-categories-section">
-                    <ClothingCategories
-                        selectedItems={selectedItems}
-                        onItemSelect={handleItemSelect}
-                    />
-                </div>
-            </div>
-
-            {/* Chat Panel Toggle Button */}
-            <ChatToggleButton
-                isOpen={isChatPanelOpen}
-                onClick={toggleChatPanel}
-            />
-
-            {/* Sliding AI Chat Panel */}
-            <SlidingChatPanel
-                isOpen={isChatPanelOpen}
-                onClose={closeChatPanel}
-            >
                 <ChatWidgetPanel />
-            </SlidingChatPanel>
+            </div>
         </div>
     );
 };
