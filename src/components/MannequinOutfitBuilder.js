@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CherChatPanel from './CherChatPanel';
 import './MannequinOutfitBuilder.css';
 
 const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
   const [currentItems, setCurrentItems] = useState({
-    hat: 0,
-    top: 0,
-    bottom: 0,
-    shoes: 0
+    hat: null,
+    top: null,
+    bottom: null,
+    shoes: null
   });
+
+  // Reset items when trip changes (especially for new trips)
+  useEffect(() => {
+    setCurrentItems({
+      hat: null,
+      top: null,
+      bottom: null,
+      shoes: null
+    });
+  }, [selectedTrip?.id]);
 
   // Mock clothing data - replace with real data later
   const clothingData = {
@@ -43,13 +53,16 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
       const items = clothingData[category];
       const currentIndex = prev[category];
       let newIndex;
-      
-      if (direction === 'next') {
+
+      if (currentIndex === null) {
+        // If no item is selected, start with the first item
+        newIndex = 0;
+      } else if (direction === 'next') {
         newIndex = (currentIndex + 1) % items.length;
       } else {
         newIndex = currentIndex === 0 ? items.length - 1 : currentIndex - 1;
       }
-      
+
       return {
         ...prev,
         [category]: newIndex
@@ -58,7 +71,8 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
   };
 
   const getCurrentItem = (category) => {
-    return clothingData[category][currentItems[category]];
+    const index = currentItems[category];
+    return index !== null ? clothingData[category][index] : null;
   };
 
   const handleSaveOutfit = () => {
@@ -89,21 +103,21 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
             <div className="outfit-info">
               <strong>Outfit:</strong> {selectedOutfit}
             </div>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Enter outfit name..."
               className="outfit-name-input"
               defaultValue={`${selectedTrip?.name || 'Trip'} - Outfit ${selectedOutfit}`}
             />
           </div>
-          
+
           <div className="outfit-actions">
             <button className="save-btn" onClick={handleSaveOutfit}>
               {/* TODO: REPLACE WITH SAVE ICON IMAGE */}
               {/* Replace emoji with: <img src="/images/icons/save-icon.png" alt="Save" className="button-icon" /> */}
               💾 Save Outfit
             </button>
-            <button className="clear-btn" onClick={() => setCurrentItems({ hat: 0, top: 0, bottom: 0, shoes: 0 })}>
+            <button className="clear-btn" onClick={() => setCurrentItems({ hat: null, top: null, bottom: null, shoes: null })}>
               {/* TODO: REPLACE WITH DELETE/TRASH ICON IMAGE */}
               {/* Replace emoji with: <img src="/images/icons/trash-icon.png" alt="Clear" className="button-icon" /> */}
               🗑️ Clear All
@@ -116,7 +130,7 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
           <div className="mannequin">
             {/* Hat Section */}
             <div className="clothing-section hat-section" data-body-part="HEAD">
-              <button 
+              <button
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('hat', 'prev')}
               >
@@ -124,17 +138,26 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
               </button>
               <div className="clothing-item hat-item">
                 <div className="item-display">
-                  {/* TODO: REPLACE WITH ACTUAL HAT IMAGE */}
-                  {/* Replace span with: <img src={`/images/clothing/hats/${getCurrentItem('hat').id}.png`} alt={getCurrentItem('hat').name} className="clothing-image" /> */}
-                  <span className="item-icon">🎩</span>
-                  <div className="item-info">
-                    {/* TODO: REMOVE TEXT - Keep only image */}
-                    <div className="item-name">{getCurrentItem('hat').name}</div>
-                    <div className="item-color">{getCurrentItem('hat').color}</div>
-                  </div>
+                  {getCurrentItem('hat') ? (
+                    <>
+                      {/* TODO: REPLACE WITH ACTUAL HAT IMAGE */}
+                      {/* Replace span with: <img src={`/images/clothing/hats/${getCurrentItem('hat').id}.png`} alt={getCurrentItem('hat').name} className="clothing-image" /> */}
+                      <span className="item-icon">🎩</span>
+                      <div className="item-info">
+                        {/* TODO: REMOVE TEXT - Keep only image */}
+                        <div className="item-name">{getCurrentItem('hat').name}</div>
+                        <div className="item-color">{getCurrentItem('hat').color}</div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="empty-item">
+                      <span className="empty-icon">➕</span>
+                      <div className="empty-text">Add Hat</div>
+                    </div>
+                  )}
                 </div>
               </div>
-              <button 
+              <button
                 className="nav-arrow right-arrow"
                 onClick={() => handleItemChange('hat', 'next')}
               >
@@ -144,7 +167,7 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
 
             {/* Top Section */}
             <div className="clothing-section top-section" data-body-part="CHEST">
-              <button 
+              <button
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('top', 'prev')}
               >
@@ -152,17 +175,26 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
               </button>
               <div className="clothing-item top-item">
                 <div className="item-display">
-                  {/* TODO: REPLACE WITH ACTUAL TOP/SHIRT IMAGE */}
-                  {/* Replace span with: <img src={`/images/clothing/tops/${getCurrentItem('top').id}.png`} alt={getCurrentItem('top').name} className="clothing-image" /> */}
-                  <span className="item-icon">👕</span>
-                  <div className="item-info">
-                    {/* TODO: REMOVE TEXT - Keep only image */}
-                    <div className="item-name">{getCurrentItem('top').name}</div>
-                    <div className="item-color">{getCurrentItem('top').color}</div>
-                  </div>
+                  {getCurrentItem('top') ? (
+                    <>
+                      {/* TODO: REPLACE WITH ACTUAL TOP/SHIRT IMAGE */}
+                      {/* Replace span with: <img src={`/images/clothing/tops/${getCurrentItem('top').id}.png`} alt={getCurrentItem('top').name} className="clothing-image" /> */}
+                      <span className="item-icon">👕</span>
+                      <div className="item-info">
+                        {/* TODO: REMOVE TEXT - Keep only image */}
+                        <div className="item-name">{getCurrentItem('top').name}</div>
+                        <div className="item-color">{getCurrentItem('top').color}</div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="empty-item">
+                      <span className="empty-icon">➕</span>
+                      <div className="empty-text">Add Top</div>
+                    </div>
+                  )}
                 </div>
               </div>
-              <button 
+              <button
                 className="nav-arrow right-arrow"
                 onClick={() => handleItemChange('top', 'next')}
               >
@@ -172,7 +204,7 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
 
             {/* Bottom Section */}
             <div className="clothing-section bottom-section" data-body-part="LEGS">
-              <button 
+              <button
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('bottom', 'prev')}
               >
@@ -180,17 +212,26 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
               </button>
               <div className="clothing-item bottom-item">
                 <div className="item-display">
-                  {/* TODO: REPLACE WITH ACTUAL BOTTOM/PANTS IMAGE */}
-                  {/* Replace span with: <img src={`/images/clothing/bottoms/${getCurrentItem('bottom').id}.png`} alt={getCurrentItem('bottom').name} className="clothing-image" /> */}
-                  <span className="item-icon">👖</span>
-                  <div className="item-info">
-                    {/* TODO: REMOVE TEXT - Keep only image */}
-                    <div className="item-name">{getCurrentItem('bottom').name}</div>
-                    <div className="item-color">{getCurrentItem('bottom').color}</div>
-                  </div>
+                  {getCurrentItem('bottom') ? (
+                    <>
+                      {/* TODO: REPLACE WITH ACTUAL BOTTOM/PANTS IMAGE */}
+                      {/* Replace span with: <img src={`/images/clothing/bottoms/${getCurrentItem('bottom').id}.png`} alt={getCurrentItem('bottom').name} className="clothing-image" /> */}
+                      <span className="item-icon">👖</span>
+                      <div className="item-info">
+                        {/* TODO: REMOVE TEXT - Keep only image */}
+                        <div className="item-name">{getCurrentItem('bottom').name}</div>
+                        <div className="item-color">{getCurrentItem('bottom').color}</div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="empty-item">
+                      <span className="empty-icon">➕</span>
+                      <div className="empty-text">Add Bottom</div>
+                    </div>
+                  )}
                 </div>
               </div>
-              <button 
+              <button
                 className="nav-arrow right-arrow"
                 onClick={() => handleItemChange('bottom', 'next')}
               >
@@ -200,7 +241,7 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
 
             {/* Shoes Section */}
             <div className="clothing-section shoes-section" data-body-part="FEET">
-              <button 
+              <button
                 className="nav-arrow left-arrow"
                 onClick={() => handleItemChange('shoes', 'prev')}
               >
@@ -208,17 +249,26 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
               </button>
               <div className="clothing-item shoes-item">
                 <div className="item-display">
-                  {/* TODO: REPLACE WITH ACTUAL SHOES IMAGE */}
-                  {/* Replace span with: <img src={`/images/clothing/shoes/${getCurrentItem('shoes').id}.png`} alt={getCurrentItem('shoes').name} className="clothing-image" /> */}
-                  <span className="item-icon">👠</span>
-                  <div className="item-info">
-                    {/* TODO: REMOVE TEXT - Keep only image */}
-                    <div className="item-name">{getCurrentItem('shoes').name}</div>
-                    <div className="item-color">{getCurrentItem('shoes').color}</div>
-                  </div>
+                  {getCurrentItem('shoes') ? (
+                    <>
+                      {/* TODO: REPLACE WITH ACTUAL SHOES IMAGE */}
+                      {/* Replace span with: <img src={`/images/clothing/shoes/${getCurrentItem('shoes').id}.png`} alt={getCurrentItem('shoes').name} className="clothing-image" /> */}
+                      <span className="item-icon">👠</span>
+                      <div className="item-info">
+                        {/* TODO: REMOVE TEXT - Keep only image */}
+                        <div className="item-name">{getCurrentItem('shoes').name}</div>
+                        <div className="item-color">{getCurrentItem('shoes').color}</div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="empty-item">
+                      <span className="empty-icon">➕</span>
+                      <div className="empty-text">Add Shoes</div>
+                    </div>
+                  )}
                 </div>
               </div>
-              <button 
+              <button
                 className="nav-arrow right-arrow"
                 onClick={() => handleItemChange('shoes', 'next')}
               >
@@ -230,7 +280,7 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
 
         {/* Right Side - Cher Chat Panel */}
         <div className="chat-panel">
-          <CherChatPanel 
+          <CherChatPanel
             selectedTrip={selectedTrip}
             selectedOutfit={selectedOutfit}
             currentItems={currentItems}

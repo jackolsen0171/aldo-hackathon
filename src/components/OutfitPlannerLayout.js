@@ -7,6 +7,7 @@ import SlidingChatPanel from './SlidingChatPanel';
 import ChatWidgetPanel from './ChatWidgetPanel';
 import ChatToggleButton from './ChatToggleButton';
 import { initialAppState, mockTrips } from '../data/mockData';
+import { createNewTrip } from '../services/tripService';
 import './OutfitPlannerLayout.css';
 
 const OutfitPlannerLayout = ({ onNavigate }) => {
@@ -14,7 +15,7 @@ const OutfitPlannerLayout = ({ onNavigate }) => {
     const [isChatPanelOpen, setIsChatPanelOpen] = useState(initialAppState.isChatPanelOpen);
     const [selectedTrip, setSelectedTrip] = useState(initialAppState.selectedTrip);
     const [selectedDay, setSelectedDay] = useState(initialAppState.selectedDay);
-    const [trips] = useState(mockTrips);
+    const [trips, setTrips] = useState(mockTrips);
     const [selectedItems, setSelectedItems] = useState({});
 
     // Get current trip data
@@ -46,8 +47,20 @@ const OutfitPlannerLayout = ({ onNavigate }) => {
     };
 
     const handleNewTrip = () => {
-        // Placeholder for new trip creation
-        console.log('New trip creation - to be implemented');
+        // Create a blank trip using the service
+        const newTrip = createNewTrip();
+
+        // Add the new trip to the trips array
+        setTrips(prevTrips => [...prevTrips, newTrip]);
+
+        // Select the new trip
+        setSelectedTrip(newTrip.id);
+        setSelectedDay(1);
+
+        // Clear selected items when creating a new trip
+        setSelectedItems({});
+
+        console.log('Created new trip:', newTrip);
     };
 
     const handleItemSelect = (category, item) => {
@@ -75,14 +88,14 @@ const OutfitPlannerLayout = ({ onNavigate }) => {
         <div className="outfit-planner-layout">
             {/* Back to Home Button */}
             {onNavigate && (
-                <button 
+                <button
                     className="back-to-home-btn"
                     onClick={() => onNavigate('home')}
                 >
                     ← Back to Home
                 </button>
             )}
-            
+
             {/* Left Sidebar - Saved Trips */}
             <div className="layout-sidebar">
                 <SavedTripsSidebar

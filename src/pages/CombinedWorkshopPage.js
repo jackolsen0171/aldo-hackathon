@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import SavedTripsSidebar from '../components/SavedTripsSidebar';
 import MannequinOutfitBuilder from '../components/MannequinOutfitBuilder';
 import { initialAppState, mockTrips } from '../data/mockData';
+import { createNewTrip } from '../services/tripService';
 import './CombinedWorkshopPage.css';
 
 const CombinedWorkshopPage = ({ onNavigate }) => {
   const [selectedTrip, setSelectedTrip] = useState(initialAppState.selectedTrip);
   const [selectedOutfit, setSelectedOutfit] = useState(1);
-  const [trips] = useState(mockTrips);
+  const [trips, setTrips] = useState(mockTrips);
 
   // Get current trip data
   const currentTrip = trips.find(trip => trip.id === selectedTrip);
@@ -18,7 +19,17 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
   };
 
   const handleNewTrip = () => {
-    console.log('New trip creation - to be implemented');
+    // Create a blank trip using the service
+    const newTrip = createNewTrip();
+
+    // Add the new trip to the trips array
+    setTrips(prevTrips => [...prevTrips, newTrip]);
+
+    // Select the new trip
+    setSelectedTrip(newTrip.id);
+    setSelectedOutfit(1);
+
+    console.log('Created new trip:', newTrip);
   };
 
   const handleOutfitSelect = (outfitNumber) => {
@@ -30,13 +41,13 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
       {/* Navigation Header */}
       <header className="combined-header">
         <nav className="combined-nav">
-          <button 
+          <button
             className="nav-button"
             onClick={() => onNavigate('home')}
           >
             Home
           </button>
-          <button 
+          <button
             className="nav-button active"
             onClick={() => onNavigate('combined-workshop')}
           >
