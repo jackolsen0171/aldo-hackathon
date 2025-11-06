@@ -1,0 +1,124 @@
+.example-prompts {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.example-prompts h3 {
+    margin: 0 0 16px 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.prompts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.prompt-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.prompt-card:hover {
+    border-color: #ff6b6b;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.1);
+    transform: translateY(-1px);
+}
+
+.prompt-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.prompt-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+.prompt-text {
+    font-size: 0.8rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .example-prompts {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .prompts-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .prompt-card {
+        padding: 12px;
+    }
+    
+    .prompt-icon {
+        font-size: 1.3rem;
+        margin-bottom: 6px;
+    }
+    
+    .prompt-title {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+    
+    .prompt-text {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .example-prompts {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .example-prompts h3 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .prompts-grid {
+        gap: 8px;
+    }
+    
+    .prompt-card {
+        padding: 10px;
+    }
+    
+    .prompt-icon {
+        font-size: 1.2rem;
+        margin-bottom: 4px;
+    }
+    
+    .prompt-title {
+        font-size: 0.8rem;
+    }
+    
+    .prompt-text {
+        font-size: 0.7rem;
+    }
+}

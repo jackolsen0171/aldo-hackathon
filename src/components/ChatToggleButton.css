@@ -1,0 +1,159 @@
+/* Chat Toggle Button */
+.chat-toggle-button {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff8a80 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 60px;
+  justify-content: center;
+}
+
+.chat-toggle-button:hover {
+  background: linear-gradient(135deg, #ff8a80 0%, #ff6b9d 100%);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 6px 16px rgba(255, 107, 157, 0.4);
+}
+
+.chat-toggle-button:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.chat-toggle-button.active {
+  background: linear-gradient(135deg, #666 0%, #888 100%);
+  right: 420px; /* Width of panel + margin */
+}
+
+.toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.close-icon {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.chat-icon {
+  font-size: 1.1rem;
+}
+
+.toggle-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Responsive positioning */
+@media (max-width: 1024px) {
+  .chat-toggle-button.active {
+    right: 370px; /* Adjusted for smaller panel width */
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-toggle-button {
+    right: 16px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+  
+  .chat-toggle-button.active {
+    right: 16px; /* Stay in same position on mobile */
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8a80 100%);
+  }
+  
+  .toggle-icon {
+    font-size: 1.1rem;
+  }
+  
+  .toggle-text {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-toggle-button {
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    min-width: 50px;
+  }
+  
+  .toggle-icon {
+    font-size: 1rem;
+  }
+  
+  .toggle-text {
+    font-size: 0.75rem;
+  }
+}
+
+/* Accessibility improvements */
+.chat-toggle-button:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .chat-toggle-button {
+    background: #000;
+    border: 2px solid #fff;
+  }
+  
+  .chat-toggle-button:hover {
+    background: #333;
+  }
+  
+  .chat-toggle-button.active {
+    background: #666;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .chat-toggle-button {
+    transition: none;
+  }
+  
+  .chat-toggle-button:hover {
+    transform: translateY(-50%);
+  }
+  
+  .chat-toggle-button:active {
+    transform: translateY(-50%);
+  }
+}
+
+/* Animation for panel state changes */
+.chat-toggle-button {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}

@@ -1,0 +1,152 @@
+/* OutfitPlannerLayout.css */
+
+.outfit-planner-layout {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    background-color: var(--color-neutral-light);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Left Sidebar */
+.layout-sidebar {
+    width: var(--sidebar-width-desktop);
+    min-width: var(--sidebar-width-desktop);
+    background-color: var(--color-white);
+    border-right: 1px solid var(--color-border-light);
+    box-shadow: 2px 0 4px var(--shadow-light);
+    z-index: 10;
+}
+
+/* Main Content Area */
+.layout-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-xl);
+    overflow-y: auto;
+    min-width: 0; /* Prevent flex item from overflowing */
+}
+
+/* Day Selection Section */
+.day-selection-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Outfit Visualization Section */
+.outfit-visualization-section {
+    margin-bottom: var(--spacing-2xl);
+    display: flex;
+    justify-content: center;
+}
+
+/* Clothing Categories Section */
+.clothing-categories-section {
+    flex: 1;
+    min-height: 0; /* Allow scrolling if needed */
+}
+
+/* Chat Panel Toggle Button - Now handled by ChatToggleButton component */
+
+/* Responsive Design */
+
+/* Tablet Layout (768px - 1024px) */
+@media (max-width: 1024px) {
+    .layout-sidebar {
+        width: var(--sidebar-width-tablet);
+        min-width: var(--sidebar-width-tablet);
+    }
+    
+    .layout-main {
+        padding: var(--spacing-base);
+    }
+    
+    /* Chat toggle button styles handled by ChatToggleButton component */
+}
+
+/* Mobile Layout (< 768px) */
+@media (max-width: 768px) {
+    .outfit-planner-layout {
+        flex-direction: column;
+    }
+    
+    .layout-sidebar {
+        width: 100%;
+        min-width: unset;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border-light);
+        position: relative;
+        z-index: 5;
+    }
+    
+    .layout-main {
+        flex: 1;
+        padding: var(--spacing-sm);
+        height: calc(100vh - 120px); /* Adjust based on sidebar height */
+    }
+    
+    .day-selection-section {
+        margin-bottom: var(--spacing-base);
+    }
+    
+    .outfit-visualization-section {
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    /* Chat toggle button styles handled by ChatToggleButton component */
+}
+
+/* Very Small Mobile (< 480px) */
+@media (max-width: 480px) {
+    .layout-main {
+        padding: var(--spacing-sm);
+    }
+    
+    .day-selection-section {
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .outfit-visualization-section {
+        margin-bottom: var(--spacing-base);
+    }
+    
+    /* Chat toggle button styles handled by ChatToggleButton component */
+}
+
+/* Layout adjustments when chat panel is open */
+.outfit-planner-layout.chat-open {
+    /* Add any specific styles when chat is open if needed */
+}
+
+/* Ensure proper scrolling behavior */
+.layout-main {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) var(--color-neutral-gray);
+}
+
+.layout-main::-webkit-scrollbar {
+    width: 6px;
+}
+
+.layout-main::-webkit-scrollbar-track {
+    background: var(--color-neutral-gray);
+    border-radius: var(--radius-sm);
+}
+
+.layout-main::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
+    border-radius: var(--radius-sm);
+}
+
+.layout-main::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-dark);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .layout-sidebar {
+        border-right: 2px solid #000;
+    }
+}

@@ -1,0 +1,32 @@
+.clothing-categories {
+  width: 100%;
+  padding: var(--spacing-base) 0;
+}
+
+.categories-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-base);
+  max-width: 100%;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .clothing-categories {
+    padding: var(--spacing-sm) 0;
+  }
+  
+  .categories-container {
+    gap: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .clothing-categories {
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .categories-container {
+    gap: var(--spacing-xs);
+  }
+}
