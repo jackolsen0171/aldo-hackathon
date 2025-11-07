@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import './OutfitCardCarousel.css';
 
 const CATEGORY_LABELS = {
@@ -55,7 +55,12 @@ const getItemRationale = (stylingNotes, category, item) => {
     return match.trim() + '.';
 };
 
-const OutfitCardCarousel = ({ trip }) => {
+const OutfitCardCarousel = ({
+    trip,
+    savedSkus = new Set(),
+    onSaveItems = () => {},
+    getClosetCenter = () => ({ x: 0, y: 0 })
+}) => {
     const outfits = useMemo(() => {
         if (!trip?.outfits) {
             return [];
@@ -110,6 +115,19 @@ const OutfitCardCarousel = ({ trip }) => {
                     <span>{currentIndex + 1} / {outfits.length}</span>
                 </div>
             </header>
+            <div className="day-pagination" aria-label="Day selector">
+                {outfits.map((outfit, index) => (
+                    <button
+                        key={outfit.key || index}
+                        className={`day-pill ${index === currentIndex ? 'active' : ''}`}
+                        onClick={() => setCurrentIndex(index)}
+                        type="button"
+                        aria-current={index === currentIndex ? 'true' : 'false'}
+                    >
+                        Day {outfit.day || index + 1}
+                    </button>
+                ))}
+            </div>
 
             <div className="carousel-card">
                 <div className="carousel-items">
@@ -123,6 +141,9 @@ const OutfitCardCarousel = ({ trip }) => {
                                 category={category}
                                 item={item}
                                 rationale={getItemRationale(currentOutfit.styling?.rationale, category, item)}
+                                saved={savedSkus.has(item.sku)}
+                                onSave={() => item?.sku && !savedSkus.has(item.sku) && onSaveItems([item])}
+                                getClosetCenter={getClosetCenter}
                             />
                         );
                     })}
@@ -164,17 +185,61 @@ const OutfitCardCarousel = ({ trip }) => {
 
 export default OutfitCardCarousel;
 
-const OutfitImageCard = ({ category, item, rationale }) => {
+const OutfitImageCard = ({ category, item, rationale, saved, onSave, getClosetCenter }) => {
     const imageUrl = getSkuImagePath(item.sku);
     const label = CATEGORY_LABELS[category] || category;
+    const [animating, setAnimating] = useState(false);
+    const [freezeFlip, setFreezeFlip] = useState(false);
+    const imageRef = useRef(null);
+
+    const handleSaveClick = () => {
+        if (saved || animating || !onSave) {
+            return;
+        }
+
+        const imgEl = imageRef.current;
+        const closetCenter = getClosetCenter?.();
+
+        onSave();
+
+        if (!imgEl || !closetCenter) {
+            return;
+        }
+
+        const rect = imgEl.getBoundingClientRect();
+        const clone = imgEl.cloneNode(true);
+        clone.classList.add('flying-item');
+        clone.style.position = 'fixed';
+        clone.style.left = `${rect.left}px`;
+        clone.style.top = `${rect.top}px`;
+        clone.style.width = `${rect.width}px`;
+        clone.style.height = `${rect.height}px`;
+        clone.style.zIndex = '9999';
+        document.body.appendChild(clone);
+
+        setAnimating(true);
+
+        requestAnimationFrame(() => {
+            const translateX = closetCenter.x - (rect.left + rect.width / 2);
+            const translateY = closetCenter.y - (rect.top + rect.height / 2);
+            clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(0.2)`;
+            clone.style.opacity = '0';
+        });
+
+        setTimeout(() => {
+            clone.remove();
+            setAnimating(false);
+        }, 700);
+    };
 
     return (
-        <div className="outfit-flip-card">
+        <div className={`outfit-flip-card ${freezeFlip ? 'freeze' : ''}`}>
             <div className="flip-inner" tabIndex={0}>
                 <div className="flip-face flip-face-front">
                     <div className="image-frame">
                         {imageUrl ? (
                             <img
+                                ref={imageRef}
                                 src={imageUrl}
                                 alt={item.name}
                                 onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -199,6 +264,18 @@ const OutfitImageCard = ({ category, item, rationale }) => {
                     <p>{rationale}</p>
                 </div>
             </div>
+            <button
+                className={`save-item-btn ${saved ? 'saved' : ''}`}
+                onClick={handleSaveClick}
+                type="button"
+                disabled={saved}
+                onMouseEnter={() => setFreezeFlip(true)}
+                onMouseLeave={() => setFreezeFlip(false)}
+                onFocus={() => setFreezeFlip(true)}
+                onBlur={() => setFreezeFlip(false)}
+            >
+                {saved ? 'Added to closet' : 'Save to closet'}
+            </button>
         </div>
     );
 };

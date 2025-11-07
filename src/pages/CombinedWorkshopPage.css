@@ -10,20 +10,171 @@
   --aldo-outline: #e5ddd3;
 }
 
+
 .unified-workshop-page {
   min-height: 100vh;
   background: var(--aldo-background);
-  padding: 40px clamp(20px, 5vw, 80px);
+  padding: 32px clamp(20px, 5vw, 80px) 40px;
   box-sizing: border-box;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   color: var(--aldo-text);
+  position: relative;
+  overflow: hidden;
+}
+
+.wallpaper-clothing {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wallpaper-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  animation: scrollUp 20s linear infinite;
+  margin: 0 6px;
+  min-height: 200vh;
+}
+
+.wallpaper-column:nth-child(even) {
+  animation: scrollDown 24s linear infinite;
+}
+
+.wallpaper-image-wrapper {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  width: 100%;
+  height: 160px;
+}
+
+.wallpaper-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@keyframes scrollUp {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scrollDown {
+  0% {
+    transform: translateY(-50%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.unified-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-mark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand-aldotext {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.35rem;
+}
+
+.brand-subline {
+  font-size: 0.9rem;
+  letter-spacing: 0.4rem;
+  text-transform: uppercase;
+}
+
+.profile-widget {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--aldo-surface);
+  padding: 10px 18px;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px var(--aldo-shadow);
+  flex-wrap: wrap;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--aldo-text);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.profile-name {
+  font-weight: 600;
+}
+
+.profile-integrations {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.integrations-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aldo-muted);
+}
+
+.integration-placeholder {
+  min-width: 140px;
+  border: 1px dashed var(--aldo-outline);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  color: var(--aldo-muted);
+  text-align: center;
 }
 
 .unified-columns {
   display: grid;
   grid-template-columns: 1fr 1.2fr 0.9fr;
   gap: clamp(16px, 3vw, 32px);
-  min-height: calc(100vh - 80px);
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+  position: relative;
+  z-index: 1;
 }
 
 .unified-column {
@@ -34,6 +185,10 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  min-height: 0;
+  height: 100%;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
 }
 
 .left-column {
@@ -134,7 +289,7 @@
 
 .middle-placeholder {
   flex: 1;
-  border: 2px dashed var(--aldo-outline);
+  border: 1px dashed var(--aldo-outline);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -144,6 +299,7 @@
   padding: 40px;
   color: var(--aldo-muted);
   gap: 12px;
+  background: transparent;
 }
 
 .middle-placeholder.loading {
@@ -182,6 +338,11 @@
   gap: 20px;
 }
 
+.closet-panel.inventory-open {
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
 .closet-panel .closet-wrapper {
   transform: scale(0.9);
 }
@@ -193,10 +354,131 @@
   margin: 0;
 }
 
+.closet-inventory {
+  background: var(--aldo-surface);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 25px 50px var(--aldo-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.closet-inventory.full {
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+  border: 1px solid var(--aldo-outline);
+}
+
+.closet-inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closet-inventory-header h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.closet-back-btn {
+  border: none;
+  background: transparent;
+  color: var(--aldo-text);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.closet-back-btn:hover {
+  background: rgba(30, 30, 30, 0.08);
+}
+
+.closet-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--aldo-text);
+}
+
+.closet-empty {
+  margin: 0;
+  color: var(--aldo-muted);
+  font-size: 0.9rem;
+}
+
+.closet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.closet-item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--aldo-outline);
+}
+
+.closet-item-image {
+  width: 100%;
+  max-width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f0f0f0;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.closet-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.closet-image-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--aldo-muted);
+}
+
+.closet-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.closet-item-meta strong {
+  font-size: 0.9rem;
+}
+
+.closet-item-meta span {
+  font-size: 0.8rem;
+  color: var(--aldo-muted);
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -209,5 +491,10 @@
 
   .unified-column {
     min-height: auto;
+  }
+
+  .profile-widget {
+    width: 100%;
+    justify-content: space-between;
   }
 }

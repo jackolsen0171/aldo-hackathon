@@ -6,6 +6,33 @@
     color: var(--aldo-text);
 }
 
+.day-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.day-pill {
+    border: 1px solid var(--aldo-outline);
+    background: transparent;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.day-pill.active {
+    background: var(--aldo-text);
+    color: #fff;
+    border-color: var(--aldo-text);
+}
+
+.day-pill:hover:not(.active) {
+    border-color: var(--aldo-muted);
+    color: var(--aldo-text);
+}
+
 .carousel-header {
     display: flex;
     justify-content: space-between;
@@ -47,6 +74,8 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .carousel-items {
@@ -57,6 +86,9 @@
 
 .outfit-flip-card {
     perspective: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .flip-inner {
@@ -73,9 +105,38 @@
     box-shadow: 0 0 0 3px var(--aldo-accent-strong);
 }
 
-.outfit-flip-card:hover .flip-inner,
-.outfit-flip-card:focus-within .flip-inner {
+.save-item-btn {
+    border: 1px solid var(--aldo-text);
+    background: transparent;
+    color: var(--aldo-text);
+    border-radius: 999px;
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.save-item-btn:hover:not(:disabled) {
+    background: var(--aldo-text);
+    color: #fff;
+}
+
+.save-item-btn.saved,
+.save-item-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+    border-color: var(--aldo-muted);
+    color: var(--aldo-muted);
+}
+
+.outfit-flip-card:not(.freeze):hover .flip-inner,
+.outfit-flip-card:not(.freeze):focus-within .flip-inner {
     transform: rotateY(180deg);
+}
+
+.outfit-flip-card.freeze .flip-inner {
+    transform: rotateY(0) !important;
 }
 
 .flip-face {
@@ -131,6 +192,12 @@
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+.flying-item {
+    transition: transform 0.6s ease, opacity 0.6s ease;
+    border-radius: 14px;
+    pointer-events: none;
 }
 
 .image-fallback {

@@ -94,71 +94,17 @@ const NewEventInputInterface = ({
     const isSubmitDisabled = !inputValue.trim() || loading || chatLoading;
     const isProcessing = loading || chatLoading;
 
-    // Generate image paths for animated background
-    const generateImageColumns = () => {
-        const images = Array.from({ length: 30 }, (_, i) =>
-            `/Images/${String(i + 1).padStart(3, '0')}.png`
-        );
-
-        // Create 5 columns with shuffled images
-        const columns = [[], [], [], [], []];
-        images.forEach((img, idx) => {
-            columns[idx % 5].push(img);
-        });
-
-        return columns;
-    };
-
-    const imageColumns = generateImageColumns();
-
     return (
         <div className="new-event-input-interface" role="main" aria-label="New trip planning interface">
-            <a href="#trip-input" className="skip-link">Skip to trip input</a>
-
-            {/* Animated Background */}
-            <div className="animated-background" aria-hidden="true">
-                {imageColumns.map((column, colIndex) => (
-                    <div
-                        key={colIndex}
-                        className={`image-column column-${colIndex}`}
-                        style={{ animationDelay: `${colIndex * -2}s` }}
-                    >
-                        {/* Duplicate images for seamless loop */}
-                        {[...column, ...column].map((imgPath, imgIndex) => (
-                            <div key={imgIndex} className="image-wrapper">
-                                <img
-                                    src={imgPath}
-                                    alt=""
-                                    loading="lazy"
-                                    className="background-image"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
 
             <div className="input-container">
-                {/* Header Section */}
-                <div className="input-header">
-                    <div className="cher-greeting">
-                        <div className="cher-avatar-small" role="img" aria-label="Cher, your AI style assistant">
-                            <div className="cher-avatar-placeholder">👩‍🦱</div>
-                        </div>
-                        <div className="greeting-text">
-                            <h1 id="main-heading">Hi! I'm Cher, your AI style assistant</h1>
-                            <p>Tell me about your upcoming trip and I'll help you plan the perfect outfits</p>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Main Input Section */}
-                <form className="trip-input-form" onSubmit={handleSubmit} role="form" aria-labelledby="main-heading">
+                <form className="trip-input-form" onSubmit={handleSubmit} role="form" aria-labelledby="trip-input-label">
                     <div
                         className={`trip-input-wrapper ${isInputFocused ? 'focused' : ''}`}
                         aria-invalid={error || chatError ? 'true' : 'false'}
                     >
-                        <label htmlFor="trip-input" className="sr-only">
+                        <label id="trip-input-label" htmlFor="trip-input" className="sr-only">
                             Describe your trip details for outfit planning
                         </label>
                         <textarea
@@ -247,7 +193,7 @@ const NewEventInputInterface = ({
                 )}
 
                 {/* Loading State */}
-                {isProcessing && (
+                {false && isProcessing && (
                     <div
                         className="processing-indicator"
                         role="status"

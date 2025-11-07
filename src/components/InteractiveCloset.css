@@ -4,6 +4,11 @@
   justify-content: center;
   padding: 40px 20px;
   transform: scale(1.2);
+  transition: transform 0.3s ease;
+}
+
+.closet-wrapper.closet-active {
+  transform: scale(1.24);
 }
 
 .wardrobe {
@@ -18,19 +23,23 @@
   cursor: pointer;
 }
 
-.wardrobe:hover .door {
+.wardrobe:hover .door,
+.closet-wrapper.closet-active .door {
   transform: rotateY(-160deg);
 }
 
-.wardrobe:hover .door:before {
+.wardrobe:hover .door:before,
+.closet-wrapper.closet-active .door:before {
   display: none;
 }
 
-.wardrobe:hover .second-door {
+.wardrobe:hover .second-door,
+.closet-wrapper.closet-active .second-door {
   transform: rotateY(160deg);
 }
 
-.wardrobe:hover .second-door:before {
+.wardrobe:hover .second-door:before,
+.closet-wrapper.closet-active .second-door:before {
   display: none;
 }
 

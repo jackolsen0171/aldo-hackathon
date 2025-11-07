@@ -1,25 +1,44 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import InteractiveCloset from '../components/InteractiveCloset';
 import NewEventInputInterface from '../components/NewEventInputInterface';
 import EventConfirmationForm from '../components/EventConfirmationForm';
 import OutfitCardCarousel from '../components/OutfitCardCarousel';
-import { initialAppState, mockTrips } from '../data/mockData';
 import { createNewTrip, isNewTrip, updateTrip } from '../services/tripService';
 import chatService from '../services/chatService';
 import './CombinedWorkshopPage.css';
 
+const generateWallpaperColumns = () => {
+  const images = Array.from({ length: 30 }, (_, i) =>
+    `/Images/${String(i + 1).padStart(3, '0')}.png`
+  );
+
+  const columns = [[], [], [], [], []];
+  images.forEach((img, idx) => {
+    columns[idx % 5].push(img);
+  });
+
+  return columns;
+};
+
 const CombinedWorkshopPage = () => {
-  const [selectedTrip, setSelectedTrip] = useState(initialAppState.selectedTrip);
-  const [trips, setTrips] = useState(mockTrips);
+  const starterTripRef = useRef(createNewTrip({ name: 'New Trip' }));
+  const [trips, setTrips] = useState([starterTripRef.current]);
+  const [selectedTrip, setSelectedTrip] = useState(starterTripRef.current.id);
   const [processingTrip, setProcessingTrip] = useState(false);
   const [processingError, setProcessingError] = useState(null);
   const [showConfirmationForm, setShowConfirmationForm] = useState(false);
   const [extractedEventData, setExtractedEventData] = useState(null);
+  const [savedSkus, setSavedSkus] = useState(() => new Set());
+  const [savedItems, setSavedItems] = useState([]);
+  const [showClosetInventory, setShowClosetInventory] = useState(false);
+  const closetRef = useRef(null);
 
   const currentTrip = useMemo(
     () => trips.find(trip => trip.id === selectedTrip),
     [trips, selectedTrip]
   );
+
+  const wallpaperColumns = useMemo(() => generateWallpaperColumns(), []);
 
   const hasGeneratedOutfits = !!(
     currentTrip &&
@@ -113,6 +132,7 @@ const CombinedWorkshopPage = () => {
         eventData: {
           ...extractedEventData,
           ...confirmedDetails,
+          dressCode: confirmedDetails.dailyPlans?.[0]?.dressCode || confirmedDetails.dressCode || currentTrip.eventData?.dressCode || 'smart-casual',
           confirmed: true,
           confirmedAt: new Date().toISOString()
         }
@@ -147,6 +167,35 @@ const CombinedWorkshopPage = () => {
     setProcessingError(null);
   };
 
+  const handleSaveItems = (items = []) => {
+    if (!Array.isArray(items) || items.length === 0) return;
+
+    const uniqueItems = items.filter(item => item?.sku && !savedSkus.has(item.sku));
+
+    if (uniqueItems.length === 0) {
+      return;
+    }
+
+    setSavedSkus(prev => {
+      const updated = new Set(prev);
+      uniqueItems.forEach(item => updated.add(item.sku));
+      return updated;
+    });
+
+    setSavedItems(prev => {
+      const merged = [...prev, ...uniqueItems];
+      return merged.filter(
+        (item, index, self) => self.findIndex(other => other.sku === item.sku) === index
+      );
+    });
+
+    closetRef.current?.triggerClosetAnimation();
+  };
+
+  const toggleClosetInventory = () => {
+    setShowClosetInventory(prev => !prev);
+  };
+
   const generateOutfits = async (trip) => {
     const { default: outfitGenerationService } = await import('../services/OutfitGenerationService');
     const { default: contextAccumulator } = await import('../services/contextAccumulator');
@@ -162,7 +211,8 @@ const CombinedWorkshopPage = () => {
       duration: trip.totalDays || 3,
       dressCode: trip.eventData?.dressCode || 'smart-casual',
       budget: trip.eventData?.budget || null,
-      specialRequirements: trip.eventData?.specialRequirements || []
+      specialRequirements: trip.eventData?.specialRequirements || [],
+      dailyPlans: trip.eventData?.dailyPlans || []
     });
 
     const generationResult = await outfitGenerationService.generateOutfits(trip.id, {
@@ -172,7 +222,8 @@ const CombinedWorkshopPage = () => {
       startDate: trip.startDate,
       endDate: trip.endDate,
       dressCode: trip.eventData?.dressCode || 'smart-casual',
-      budget: trip.eventData?.budget || null
+      budget: trip.eventData?.budget || null,
+      dayPlans: trip.eventData?.dailyPlans || []
     });
 
     if (!generationResult.success) {
@@ -218,19 +269,59 @@ const CombinedWorkshopPage = () => {
     }
 
     if (hasGeneratedOutfits && currentTrip) {
-      return <OutfitCardCarousel trip={currentTrip} />;
+      return (
+        <OutfitCardCarousel
+          trip={currentTrip}
+          savedSkus={savedSkus}
+          onSaveItems={handleSaveItems}
+          getClosetCenter={() => closetRef.current?.getClosetCenter?.()}
+        />
+      );
     }
 
     return (
       <div className="middle-placeholder">
         <h3>Answer a few quick questions</h3>
-        <p>Type a trip description on the left to generate a smart form. Once you confirm the details, Cher will craft outfits here.</p>
+        <p>Describe your trip on the left to build a day-by-day plan. Once each day has an activity and dress code, Cher will craft tailored outfits here.</p>
       </div>
     );
   };
 
   return (
     <div className="unified-workshop-page">
+      <div className="wallpaper-clothing" aria-hidden="true">
+        {wallpaperColumns.map((column, colIndex) => (
+          <div
+            key={colIndex}
+            className={`wallpaper-column column-${colIndex}`}
+            style={{ animationDelay: `${colIndex * -2}s` }}
+          >
+            {[...column, ...column].map((imgPath, imgIndex) => (
+              <div key={imgIndex} className="wallpaper-image-wrapper">
+                <img src={imgPath} alt="" loading="lazy" className="wallpaper-image" />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <header className="unified-top-bar">
+        <div className="brand-mark">
+          <span className="brand-aldotext">ALDO</span>
+          <span className="brand-subline">OUTFIT LAB</span>
+        </div>
+        <div className="profile-widget">
+          <div className="profile-avatar">JO</div>
+          <div className="profile-info">
+            <span className="profile-name">Jack Olsen</span>
+          </div>
+          <div className="profile-integrations">
+            <span className="integrations-label">Integrations</span>
+            <div className="integration-placeholder">
+              <span>Brand images coming soon</span>
+            </div>
+          </div>
+        </div>
+      </header>
       <div className="unified-columns">
         <section className="unified-column left-column">
           <div className="column-header">
@@ -282,14 +373,62 @@ const CombinedWorkshopPage = () => {
               <h2>Shop your closet</h2>
             </div>
           </div>
-          <div className="closet-panel">
-            <InteractiveCloset onClick={() => {}} />
-            <p className="closet-hint">Tap the wardrobe to browse your saved pieces once outfits are ready.</p>
+          <div className={`closet-panel ${showClosetInventory ? 'inventory-open' : ''}`}>
+            {showClosetInventory ? (
+              <div className="closet-inventory full">
+                <div className="closet-inventory-header">
+                  <button className="closet-back-btn" onClick={toggleClosetInventory}>
+                    ← Back to closet
+                  </button>
+                  <h4>My saved items ({savedItems.length})</h4>
+                </div>
+                {savedItems.length === 0 ? (
+                  <p className="closet-empty">You haven&apos;t saved any items yet.</p>
+                ) : (
+                  <div className="closet-grid">
+                    {savedItems.map(item => (
+                      <div key={item.sku} className="closet-item-card">
+                        <div className="closet-item-image">
+                          <img
+                            src={getSkuImagePath(item.sku)}
+                            alt={item.name}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                          <div className="closet-image-fallback">{item.name?.[0]}</div>
+                        </div>
+                        <div className="closet-item-meta">
+                          <strong>{item.name}</strong>
+                          {item.colors && <span>{item.colors}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <InteractiveCloset ref={closetRef} onClick={toggleClosetInventory} />
+                <p className="closet-hint">Tap the wardrobe to browse your saved pieces once outfits are ready.</p>
+              </>
+            )}
           </div>
         </section>
       </div>
     </div>
   );
+};
+
+const getSkuImagePath = (sku) => {
+  if (!sku) return null;
+  const match = sku.match(/SKU(\d+)/i);
+  if (match) {
+    const imageNumber = match[1].padStart(3, '0');
+    return `/Images/${imageNumber}.png`;
+  }
+  return null;
 };
 
 export default CombinedWorkshopPage;

@@ -15,7 +15,12 @@ export const EventExtractionSchema = z.object({
         budget: z.number().nullable().describe("Budget amount in dollars or null if not specified"),
         specialRequirements: z.array(z.string()).describe("Array of special requirements mentioned by user"),
         needsClarification: z.array(z.string()).describe("Array of information that needs clarification from user"),
-        confidence: z.number().min(0).max(1).describe("Confidence score from 0.0 to 1.0")
+        confidence: z.number().min(0).max(1).describe("Confidence score from 0.0 to 1.0"),
+        dailyPlans: z.array(z.object({
+            day: z.number().int().min(1),
+            activity: z.string().describe("Short description of what happens that day"),
+            dressCode: z.enum(['casual', 'smart-casual', 'business', 'formal', 'black-tie'])
+        })).optional().describe("Per-day activity + dress code suggestions when duration > 1")
     })
 });
 
@@ -40,7 +45,14 @@ export function getEventExtractionSchemaForAI() {
     "budget": number | null, // Budget amount in dollars or null if not specified
     "specialRequirements": string[], // Array of special requirements mentioned by user
     "needsClarification": string[], // Array of information that needs clarification
-    "confidence": number // Confidence score from 0.0 to 1.0
+    "confidence": number, // Confidence score from 0.0 to 1.0
+    "dailyPlans": [
+      {
+        "day": number, // Day index starting at 1
+        "activity": string, // Description of activity for that day
+        "dressCode": "casual" | "smart-casual" | "business" | "formal" | "black-tie" // Dress code specific to that day
+      }
+    ]
   }
 }`;
 }

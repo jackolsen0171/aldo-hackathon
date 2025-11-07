@@ -130,6 +130,7 @@ class ContextAccumulator {
         contextFile.constraints.dressCode = confirmedDetails.dressCode;
         contextFile.constraints.budget = confirmedDetails.budget;
         contextFile.constraints.specialRequirements = confirmedDetails.specialRequirements || [];
+        contextFile.constraints.dailyPlans = confirmedDetails.dailyPlans || [];
 
         // Update occasion constraints
         contextFile.constraints.occasionConstraints = {

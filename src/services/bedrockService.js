@@ -207,7 +207,7 @@ class BedrockService {
             thisWeekend: DATE_PARSING_EXAMPLES['this weekend']()
         };
 
-        return `You are an expert event planner. Extract structured information from the user's event description.
+        return `You are an expert event planner. The user identifies as male, so interpret pronouns and context accordingly. Extract structured information from the user's event description. When the user mentions multiple days or activities, infer a per-day plan.
 
 User input: "${userMessage}"
 
@@ -251,6 +251,7 @@ EXTRACTION RULES:
 4. If date is unclear or missing, add "start date" to needsClarification
 5. Map occasion types to appropriate dress codes using the rules above
 6. Extract budget from phrases like "$500", "under $1000", "budget of 200"
+7. If duration > 1, create a dailyPlans array with entries like {"day":1,"activity":"Board meetings","dressCode":"business"}. Use user hints (e.g., "day two is casual sightseeing") or infer reasonable activities if unspecified. Each day must have a dressCode.
 
 Respond with ONLY the JSON object, no additional text or formatting.`;
     }
@@ -333,6 +334,17 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
         if (!Array.isArray(dataObj.needsClarification)) {
             dataObj.needsClarification = [];
         }
+        if (!Array.isArray(dataObj.dailyPlans)) {
+            dataObj.dailyPlans = [];
+        } else {
+            dataObj.dailyPlans = dataObj.dailyPlans
+                .filter(plan => plan && typeof plan === 'object')
+                .map((plan, index) => ({
+                    day: typeof plan.day === 'number' ? Math.max(1, Math.floor(plan.day)) : index + 1,
+                    activity: plan.activity || '',
+                    dressCode: validDressCodes.includes(plan.dressCode) ? plan.dressCode : dataObj.dressCode
+                }));
+        }
 
         // Fix confidence (ensure number between 0 and 1)
         if (typeof dataObj.confidence !== 'number' || dataObj.confidence < 0 || dataObj.confidence > 1) {
@@ -408,6 +420,12 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
         if (!location) needsClarification.push('location');
         needsClarification.push('start date');
 
+        const dailyPlans = Array.from({ length: duration }, (_, idx) => ({
+            day: idx + 1,
+            activity: idx === 0 ? occasion : `${occasion} - Day ${idx + 1}`,
+            dressCode
+        }));
+
         return {
             success: true,
             data: {
@@ -419,7 +437,8 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
                 budget: null,
                 specialRequirements: [],
                 needsClarification,
-                confidence: 0.5
+                confidence: 0.5,
+                dailyPlans
             }
         };
     }
@@ -547,19 +566,21 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
      * Build outfit generation prompt with CSV data
      */
     buildOutfitGenerationPrompt(eventDetails, csvContent, contextSummary) {
-        const { occasion, duration, location, dressCode, budget } = eventDetails;
+        const { occasion, duration, location, dressCode, budget, dayPlans = [] } = eventDetails;
         const promptContext = {
             occasion,
             duration,
             location,
             dressCode,
             budget,
+            userGender: 'male',
+            dayPlans,
             weather: contextSummary?.environment?.weather || null,
             weatherConstraints: contextSummary?.weatherConstraints || null,
             specialRequirements: contextSummary?.style?.specialRequirements || []
         };
 
-        return `You are an expert travel stylist. Using the clothing catalog below, create ${duration} complete daily outfits for the described trip. You must select items ONLY by SKU from the CSV table—do not invent new products.
+        return `You are an expert travel stylist. Using the clothing catalog below, create ${duration} complete daily outfits for the described trip. The traveler is male, so select menswear SKUs and male-appropriate styling. You must select items ONLY by SKU from the CSV table—do not invent new products. Follow the dayPlans array to tailor each day’s outfit.
 
 TRIP CONTEXT:
 ${JSON.stringify(promptContext, null, 2)}
@@ -569,7 +590,7 @@ ${csvContent}
 
 OUTPUT REQUIREMENTS:
 1. Build ${duration} daily outfits with topwear, bottomwear, and footwear. Add outerwear/accessories only when they improve the outfit or meet weather requirements.
-2. Choose SKUs that match the dress code, weather, and special requirements. Reuse versatile items across days to keep packing lean.
+2. For each day, align the outfit with the provided activity and dress code from dayPlans (if an activity is blank, infer it from the overall occasion). Reuse versatile items across days to keep packing lean.
 3. For each day, explain why the selected combination works (styling rationale), how it satisfies weather needs, and how it complies with the dress code.
 4. Respond with JSON ONLY in this structure (no markdown, no prose outside JSON):
 

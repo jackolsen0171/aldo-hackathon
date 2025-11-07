@@ -52,6 +52,72 @@
   gap: 20px;
 }
 
+.confirmation-sections {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.basic-details-panel {
+  flex: 1;
+  min-width: 280px;
+}
+
+.daily-plans-panel {
+  flex: 1;
+  min-width: 320px;
+  background: #f8f9fb;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.daily-plans-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.daily-plans-header p {
+  margin: 4px 0 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.daily-plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.daily-plan-row {
+  display: grid;
+  grid-template-columns: 0.5fr 1.2fr 0.8fr;
+  gap: 12px;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #edf1f7;
+}
+
+.day-label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.daily-plan-row input,
+.daily-plan-row select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e1e5ec;
+  font-size: 0.95rem;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -202,6 +268,14 @@
   .form-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+  
+  .confirmation-sections {
+    flex-direction: column;
+  }
+
+  .daily-plan-row {
+    grid-template-columns: 1fr;
   }
   
   .confirmation-header {

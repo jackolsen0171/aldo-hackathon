@@ -7,14 +7,25 @@ const EventConfirmationForm = ({
     onCancel,
     loading = false
 }) => {
+    const initializeDailyPlans = (duration, existingPlans = []) => {
+        const plans = [];
+        for (let i = 0; i < duration; i++) {
+            plans.push({
+                day: i + 1,
+                activity: existingPlans[i]?.activity || '',
+                dressCode: existingPlans[i]?.dressCode || eventData?.dressCode || 'smart-casual'
+            });
+        }
+        return plans;
+    };
+
     const [formData, setFormData] = useState({
         occasion: eventData?.occasion || '',
         location: eventData?.location || '',
         startDate: eventData?.startDate || '',
         duration: eventData?.duration || 1,
-        dressCode: eventData?.dressCode || 'smart-casual',
         budget: eventData?.budget || '',
-        specialRequirements: eventData?.specialRequirements?.join(', ') || ''
+        dailyPlans: initializeDailyPlans(eventData?.duration || 1, eventData?.dailyPlans || [])
     });
 
     const handleInputChange = (field, value) => {
@@ -24,15 +35,33 @@ const EventConfirmationForm = ({
         }));
     };
 
+    const handleDurationChange = (value) => {
+        const duration = Math.max(1, parseInt(value, 10) || 1);
+        setFormData(prev => ({
+            ...prev,
+            duration,
+            dailyPlans: initializeDailyPlans(duration, prev.dailyPlans)
+        }));
+    };
+
+    const handleDayPlanChange = (index, field, value) => {
+        setFormData(prev => {
+            const updatedPlans = [...prev.dailyPlans];
+            updatedPlans[index] = {
+                ...updatedPlans[index],
+                [field]: value
+            };
+            return { ...prev, dailyPlans: updatedPlans };
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
         const confirmedData = {
             ...formData,
-            specialRequirements: formData.specialRequirements
-                ? formData.specialRequirements.split(',').map(req => req.trim()).filter(req => req)
-                : [],
-            budget: formData.budget ? parseFloat(formData.budget) : null
+            budget: formData.budget ? parseFloat(formData.budget) : null,
+            specialRequirements: []
         };
 
         onConfirm(confirmedData);
@@ -59,6 +88,8 @@ const EventConfirmationForm = ({
             </div>
 
             <form onSubmit={handleSubmit} className="confirmation-form">
+                <div className="confirmation-sections">
+                    <div className="basic-details-panel">
                 <div className="form-grid">
                     {/* Occasion */}
                     <div className="form-group">
@@ -105,26 +136,9 @@ const EventConfirmationForm = ({
                             min="1"
                             max="14"
                             value={formData.duration}
-                            onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
+                            onChange={(e) => handleDurationChange(e.target.value)}
                             required
                         />
-                    </div>
-
-                    {/* Dress Code */}
-                    <div className="form-group">
-                        <label htmlFor="dressCode">Dress Code *</label>
-                        <select
-                            id="dressCode"
-                            value={formData.dressCode}
-                            onChange={(e) => handleInputChange('dressCode', e.target.value)}
-                            required
-                        >
-                            {dressCodeOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
                     </div>
 
                     {/* Budget */}
@@ -141,17 +155,39 @@ const EventConfirmationForm = ({
                         />
                     </div>
                 </div>
+                    </div>
 
-                {/* Special Requirements */}
-                <div className="form-group full-width">
-                    <label htmlFor="specialRequirements">Special Requirements (optional)</label>
-                    <textarea
-                        id="specialRequirements"
-                        value={formData.specialRequirements}
-                        onChange={(e) => handleInputChange('specialRequirements', e.target.value)}
-                        placeholder="e.g., Comfortable shoes for walking, Weather protection, Specific colors"
-                        rows="3"
-                    />
+                    <div className="daily-plans-panel">
+                    <div className="daily-plans-header">
+                        <h3>Daily Plan</h3>
+                        <p>Set the activity and dress code for each day.</p>
+                    </div>
+                    <div className="daily-plans-list">
+                        {formData.dailyPlans.map((plan, index) => (
+                            <div key={plan.day} className="daily-plan-row">
+                                <div className="day-label">
+                                    <span>Day {plan.day}</span>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={plan.activity}
+                                    onChange={(e) => handleDayPlanChange(index, 'activity', e.target.value)}
+                                    placeholder="Activity or context (e.g., Client meetings, hiking)"
+                                />
+                                <select
+                                    value={plan.dressCode}
+                                    onChange={(e) => handleDayPlanChange(index, 'dressCode', e.target.value)}
+                                >
+                                    {dressCodeOptions.map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        ))}
+                    </div>
+                </div>
                 </div>
 
                 {/* Action Buttons */}
