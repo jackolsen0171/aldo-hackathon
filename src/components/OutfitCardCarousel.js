@@ -132,6 +132,8 @@ const OutfitCardCarousel = ({
             </div>
 
             <div className="carousel-card">
+                <details className="category-details" open>
+                    <summary>Clothing</summary>
                 <div className="carousel-items">
                     {ORDERED_MAIN_CATEGORIES.map(category => {
                         const item = outfitItems[category];
@@ -150,10 +152,11 @@ const OutfitCardCarousel = ({
                         );
                     })}
                 </div>
+                </details>
 
                 {accessories.length > 0 && (
-                    <div className="accessories-block">
-                        <span className="chip-label">Accessories</span>
+                    <details className="accessories-block" open>
+                        <summary className="chip-label">Accessories</summary>
                         <div className="accessories-grid">
                             {accessories.map((accessory, idx) => (
                                 <div key={`${accessory.sku || idx}`} className="accessory-card">
@@ -170,7 +173,7 @@ const OutfitCardCarousel = ({
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </details>
                 )}
 
                 {currentOutfit.styling?.rationale && (
