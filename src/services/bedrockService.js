@@ -499,8 +499,8 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
                     content: [{ text: outfitPrompt }]
                 }],
                 inferenceConfig: {
-                    temperature: 0.3,
-                    maxTokens: 2000
+                    temperature: 0.2, // Lower temperature for more consistent results
+                    maxTokens: 3000   // More tokens for complete responses
                 }
             };
 
@@ -535,6 +535,131 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
                 }
             };
         }
+    }
+
+    /**
+     * Build outfit generation prompt with CSV data
+     */
+    buildOutfitGenerationPrompt(eventDetails, csvData, contextSummary) {
+        const { occasion, duration, location, dressCode, budget } = eventDetails;
+
+        // Parse CSV to show available items by category
+        const csvLines = csvData.split('\n').filter(line => line.trim());
+        if (csvLines.length < 2) {
+            console.warn('Invalid CSV data provided');
+            return this.buildSimplePrompt(eventDetails);
+        }
+
+        const headers = csvLines[0].split(',').map(h => h.trim());
+        const items = csvLines.slice(1).map(line => {
+            const values = line.split(',');
+            const item = {};
+            headers.forEach((header, index) => {
+                item[header] = values[index]?.trim() || '';
+            });
+            return item;
+        }).filter(item => item.sku);
+
+        // Group items by category for easier selection
+        const itemsByCategory = {
+            topwear: items.filter(item => item.category === 'Topwear'),
+            bottomwear: items.filter(item => item.category === 'Bottomwear'),
+            footwear: items.filter(item => item.category === 'Footwear'),
+            outerwear: items.filter(item => item.category === 'Outerwear')
+        };
+
+        // Filter by formality for dress code
+        const formalityFilter = this.getFormalityFilter(dressCode);
+
+        return `You are an expert fashion stylist. Create ${duration} complete outfit recommendations for a ${occasion} in ${location || 'unspecified location'} with ${dressCode} dress code.
+
+DRESS CODE REQUIREMENTS:
+- ${dressCode}: Select items with formality levels: ${formalityFilter.join(', ')}
+
+AVAILABLE ITEMS BY CATEGORY:
+
+TOPWEAR OPTIONS:
+${itemsByCategory.topwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
+
+BOTTOMWEAR OPTIONS:
+${itemsByCategory.bottomwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
+
+FOOTWEAR OPTIONS:
+${itemsByCategory.footwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
+
+OUTERWEAR OPTIONS:
+${itemsByCategory.outerwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
+
+SELECTION RULES:
+1. Choose items that match ${dressCode} formality level
+2. Ensure color coordination across the outfit
+3. Consider weather appropriateness
+4. Maximize reusability across ${duration} days
+5. Select ONLY from the SKUs listed above
+${budget ? `6. Stay within budget of ${budget}` : ''}
+
+CRITICAL: Respond with ONLY valid JSON in this exact format:
+{
+  "tripDetails": {
+    "occasion": "${occasion}",
+    "duration": ${duration},
+    "location": "${location || 'unspecified'}",
+    "dressCode": "${dressCode}",
+    "budget": ${budget || 'null'}
+  },
+  "dailyOutfits": [${Array.from({ length: duration }, (_, i) => `
+    {
+      "day": ${i + 1},
+      "date": "Day ${i + 1}",
+      "occasion": "${occasion} - Day ${i + 1}",
+      "outfit": {
+        "topwear": {"sku": "SELECT_FROM_TOPWEAR_LIST", "name": "EXACT_NAME", "category": "Topwear", "price": NUMBER, "colors": "EXACT_COLORS", "weatherSuitability": "EXACT_WEATHER", "formality": "EXACT_FORMALITY", "notes": "EXACT_NOTES"},
+        "bottomwear": {"sku": "SELECT_FROM_BOTTOMWEAR_LIST", "name": "EXACT_NAME", "category": "Bottomwear", "price": NUMBER, "colors": "EXACT_COLORS", "weatherSuitability": "EXACT_WEATHER", "formality": "EXACT_FORMALITY", "notes": "EXACT_NOTES"},
+        "footwear": {"sku": "SELECT_FROM_FOOTWEAR_LIST", "name": "EXACT_NAME", "category": "Footwear", "price": NUMBER, "colors": "EXACT_COLORS", "weatherSuitability": "EXACT_WEATHER", "formality": "EXACT_FORMALITY", "notes": "EXACT_NOTES"},
+        "outerwear": null,
+        "accessories": []
+      },
+      "styling": {
+        "rationale": "Explain why these items work together",
+        "weatherConsiderations": "Weather appropriateness explanation", 
+        "dresscodeCompliance": "How this meets ${dressCode} requirements"
+      }
+    }`).join(',')}
+  ],
+  "reusabilityAnalysis": {
+    "totalItems": 0,
+    "reusedItems": 0,
+    "reusabilityPercentage": 0,
+    "reusabilityMap": {}
+  }
+}
+
+Replace SELECT_FROM_X_LIST with actual SKUs from the lists above. Copy all item details exactly as shown.`;
+    }
+
+    /**
+     * Get formality filter for dress code
+     */
+    getFormalityFilter(dressCode) {
+        const formalityMap = {
+            'casual': ['casual'],
+            'smart-casual': ['casual', 'smart-casual'],
+            'business': ['smart-casual', 'formal'],
+            'formal': ['formal'],
+            'black-tie': ['formal']
+        };
+        return formalityMap[dressCode] || ['smart-casual'];
+    }
+
+    /**
+     * Build simple prompt when CSV parsing fails
+     */
+    buildSimplePrompt(eventDetails) {
+        const { occasion, duration, location, dressCode } = eventDetails;
+
+        return `Create ${duration} outfit recommendations for a ${occasion} with ${dressCode} dress code in ${location || 'unspecified location'}. 
+        
+        Respond with valid JSON containing tripDetails and dailyOutfits array with outfit objects containing topwear, bottomwear, footwear, and styling information.`;
     }
 
     /**
@@ -634,14 +759,37 @@ Create ${duration} daily outfits following this structure. Ensure all SKUs match
      */
     parseOutfitResponse(aiResponse, eventDetails) {
         try {
+            console.log('Parsing AI response for outfit data...');
+
             // Clean the response
             const cleanedResponse = this.cleanJsonResponse(aiResponse);
+            console.log('Cleaned response:', cleanedResponse.substring(0, 500) + '...');
+
             const outfitData = JSON.parse(cleanedResponse);
+            console.log('Parsed outfit data structure:', Object.keys(outfitData));
 
             // Validate and enhance the response
             if (!outfitData.dailyOutfits || !Array.isArray(outfitData.dailyOutfits)) {
+                console.warn('Invalid outfit data structure, using fallback');
                 throw new Error('Invalid outfit data structure');
             }
+
+            // Validate each daily outfit
+            outfitData.dailyOutfits.forEach((dayOutfit, index) => {
+                if (!dayOutfit.outfit) {
+                    console.warn(`Day ${index + 1} missing outfit data`);
+                    throw new Error(`Day ${index + 1} missing outfit data`);
+                }
+
+                // Ensure required components exist
+                const requiredComponents = ['topwear', 'bottomwear', 'footwear'];
+                for (const component of requiredComponents) {
+                    if (!dayOutfit.outfit[component]) {
+                        console.warn(`Day ${index + 1} missing ${component}`);
+                        throw new Error(`Day ${index + 1} missing ${component}`);
+                    }
+                }
+            });
 
             // Calculate reusability analysis
             const reusabilityAnalysis = this.calculateReusabilityAnalysis(outfitData.dailyOutfits);
@@ -652,12 +800,14 @@ Create ${duration} daily outfits following this structure. Ensure all SKUs match
             outfitData.sessionId = `session-${Date.now()}`;
             outfitData.generatedAt = new Date().toISOString();
 
+            console.log('✅ Successfully parsed AI outfit response');
             return outfitData;
 
         } catch (error) {
-            console.error('Failed to parse outfit response:', error);
+            console.error('❌ Failed to parse outfit response:', error.message);
+            console.log('Falling back to context-aware outfit generation...');
 
-            // Return fallback outfit data
+            // Return fallback outfit data that uses actual context
             return this.createFallbackOutfitData(eventDetails);
         }
     }
@@ -723,9 +873,38 @@ Create ${duration} daily outfits following this structure. Ensure all SKUs match
 
     /**
      * Create fallback outfit data when AI parsing fails
+     * Now uses actual CSV data and user context
      */
     createFallbackOutfitData(eventDetails) {
         const { duration, occasion, location, dressCode } = eventDetails;
+
+        // Parse CSV data to get actual items
+        const csvItems = this.parseCSVData();
+
+        // Filter items based on dress code and requirements
+        const suitableItems = this.filterItemsByRequirements(csvItems, dressCode, eventDetails);
+
+        // Generate outfits using actual CSV data
+        const dailyOutfits = [];
+
+        for (let day = 1; day <= duration; day++) {
+            const outfit = this.generateSingleOutfit(suitableItems, day, dressCode, eventDetails);
+
+            dailyOutfits.push({
+                day: day,
+                date: `Day ${day}`,
+                occasion: `${occasion} - Day ${day}`,
+                outfit: outfit,
+                styling: {
+                    rationale: `This ${dressCode} outfit is carefully selected for your ${occasion}, combining appropriate formality with comfort and style.`,
+                    weatherConsiderations: `Items selected for ${location || 'your location'} with weather-appropriate materials and layering options.`,
+                    dresscodeCompliance: `This outfit meets ${dressCode} dress code requirements with appropriate styling and formality level.`
+                }
+            });
+        }
+
+        // Calculate actual reusability
+        const reusabilityAnalysis = this.calculateReusabilityAnalysis(dailyOutfits);
 
         return {
             tripId: `trip-${Date.now()}`,
@@ -738,69 +917,95 @@ Create ${duration} daily outfits following this structure. Ensure all SKUs match
                 dressCode: dressCode,
                 budget: eventDetails.budget || null
             },
-            dailyOutfits: Array.from({ length: duration }, (_, index) => ({
-                day: index + 1,
-                date: `Day ${index + 1}`,
-                occasion: `${occasion} - Day ${index + 1}`,
-                outfit: {
-                    topwear: {
-                        sku: "SKU001",
-                        name: "Classic White T-Shirt",
-                        category: "Topwear",
-                        price: 25,
-                        colors: "white",
-                        weatherSuitability: "warm",
-                        formality: "casual",
-                        notes: "Essential lightweight cotton tee for everyday wear."
-                    },
-                    bottomwear: {
-                        sku: "SKU002",
-                        name: "Blue Denim Jeans",
-                        category: "Bottomwear",
-                        price: 60,
-                        colors: "blue",
-                        weatherSuitability: "mild",
-                        formality: "casual",
-                        notes: "Straight-fit jeans suitable for casual and semi-casual settings."
-                    },
-                    footwear: {
-                        sku: "SKU005",
-                        name: "Black Leather Shoes",
-                        category: "Footwear",
-                        price: 90,
-                        colors: "black",
-                        weatherSuitability: "mild",
-                        formality: "formal",
-                        notes: "Professional leather shoes for business settings."
-                    },
-                    outerwear: index === 0 ? {
-                        sku: "SKU003",
-                        name: "Black Blazer",
-                        category: "Outerwear",
-                        price: 120,
-                        colors: "black",
-                        weatherSuitability: "mild",
-                        formality: "formal",
-                        notes: "Tailored blazer ideal for business or formal occasions."
-                    } : null,
-                    accessories: []
-                },
-                styling: {
-                    rationale: `This ${dressCode} outfit combines professional styling with comfort for your ${occasion}. The pieces work together to create a polished look appropriate for business settings.`,
-                    weatherConsiderations: `Selected items suitable for ${location || 'your location'} weather conditions with appropriate layering options.`,
-                    dresscodeCompliance: `This outfit meets ${dressCode} dress code requirements with professional styling and appropriate formality level.`
-                }
-            })),
-            reusabilityAnalysis: {
-                totalItems: duration * 3,
-                reusedItems: Math.floor(duration * 1.5),
-                reusabilityPercentage: Math.round((Math.floor(duration * 1.5) / (duration * 3)) * 100),
-                reusabilityMap: {
-                    "SKU003": [1, 2, 3].slice(0, duration),
-                    "SKU002": duration > 1 ? [1, 3] : [1]
-                }
-            }
+            dailyOutfits: dailyOutfits,
+            reusabilityAnalysis: reusabilityAnalysis
         };
+    }
+
+    /**
+     * Parse CSV data into structured items
+     */
+    parseCSVData() {
+        // This would normally come from the CSV loader, but for fallback we'll use known data
+        return [
+            { sku: "SKU001", name: "Classic White T-Shirt", category: "Topwear", price: 25, colors: "white", weatherSuitability: "warm", formality: "casual", notes: "Essential lightweight cotton tee for everyday wear." },
+            { sku: "SKU002", name: "Blue Denim Jeans", category: "Bottomwear", price: 60, colors: "blue", weatherSuitability: "mild", formality: "casual", notes: "Straight-fit jeans suitable for casual and semi-casual settings." },
+            { sku: "SKU003", name: "Black Blazer", category: "Outerwear", price: 120, colors: "black", weatherSuitability: "mild", formality: "formal", notes: "Tailored blazer ideal for business or formal occasions." },
+            { sku: "SKU006", name: "Chino Pants", category: "Bottomwear", price: 55, colors: "khaki", weatherSuitability: "mild", formality: "smart-casual", notes: "Cotton-blend chinos ideal for office or travel." },
+            { sku: "SKU007", name: "Silk Blouse", category: "Topwear", price: 70, colors: "cream", weatherSuitability: "warm", formality: "formal", notes: "Flowy silk blouse for formal dinners or professional wear." },
+            { sku: "SKU008", name: "Wool Turtleneck", category: "Topwear", price: 65, colors: "charcoal", weatherSuitability: "cold", formality: "smart-casual", notes: "Classic knit turtleneck perfect for layering in winter." },
+            { sku: "SKU011", name: "White Sneakers", category: "Footwear", price: 85, colors: "white", weatherSuitability: "mild", formality: "casual", notes: "Comfortable sneakers that pair with nearly any outfit." },
+            { sku: "SKU012", name: "Leather Dress Shoes", category: "Footwear", price: 130, colors: "black", weatherSuitability: "mild", formality: "formal", notes: "Classic lace-up oxfords for professional occasions." },
+            { sku: "SKU014", name: "Linen Button-Up Shirt", category: "Topwear", price: 45, colors: "light blue", weatherSuitability: "warm", formality: "smart-casual", notes: "Ideal for vacations or outdoor lunches." },
+            { sku: "SKU009", name: "Pleated Midi Skirt", category: "Bottomwear", price: 50, colors: "beige", weatherSuitability: "warm", formality: "smart-casual", notes: "Versatile skirt for brunch, dates, or business-casual outfits." }
+        ];
+    }
+
+    /**
+     * Filter items based on dress code and requirements
+     */
+    filterItemsByRequirements(items, dressCode, eventDetails) {
+        const formalityMap = {
+            'casual': ['casual'],
+            'smart-casual': ['casual', 'smart-casual'],
+            'business': ['smart-casual', 'formal'],
+            'formal': ['formal'],
+            'black-tie': ['formal']
+        };
+
+        const allowedFormalities = formalityMap[dressCode] || ['smart-casual'];
+
+        return {
+            topwear: items.filter(item => item.category === 'Topwear' && allowedFormalities.includes(item.formality)),
+            bottomwear: items.filter(item => item.category === 'Bottomwear' && allowedFormalities.includes(item.formality)),
+            footwear: items.filter(item => item.category === 'Footwear' && allowedFormalities.includes(item.formality)),
+            outerwear: items.filter(item => item.category === 'Outerwear' && allowedFormalities.includes(item.formality))
+        };
+    }
+
+    /**
+     * Generate a single outfit from suitable items
+     */
+    generateSingleOutfit(suitableItems, day, dressCode, eventDetails) {
+        // Select items based on day and variety
+        const topwear = this.selectItemForDay(suitableItems.topwear, day, dressCode);
+        const bottomwear = this.selectItemForDay(suitableItems.bottomwear, day, dressCode);
+        const footwear = this.selectItemForDay(suitableItems.footwear, day, dressCode);
+
+        // Add outerwear for formal occasions or first day
+        const outerwear = (dressCode === 'formal' || dressCode === 'business' || day === 1)
+            ? this.selectItemForDay(suitableItems.outerwear, day, dressCode)
+            : null;
+
+        return {
+            topwear: topwear,
+            bottomwear: bottomwear,
+            footwear: footwear,
+            outerwear: outerwear,
+            accessories: []
+        };
+    }
+
+    /**
+     * Select appropriate item for specific day and dress code
+     */
+    selectItemForDay(items, day, dressCode) {
+        if (!items || items.length === 0) {
+            return null;
+        }
+
+        // For variety, cycle through available items
+        const index = (day - 1) % items.length;
+
+        // Prefer higher formality items for formal dress codes
+        if (dressCode === 'formal' || dressCode === 'business') {
+            const formalItems = items.filter(item => item.formality === 'formal');
+            if (formalItems.length > 0) {
+                return formalItems[index % formalItems.length];
+            }
+        }
+
+        return items[index];
     }
 
     /**

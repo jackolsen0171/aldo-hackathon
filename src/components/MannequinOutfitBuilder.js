@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CherChatPanel from './CherChatPanel';
 import OutfitDisplay from './OutfitDisplay';
+import OutfitSummaryPanel from './OutfitSummaryPanel';
 import './MannequinOutfitBuilder.css';
 
 const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
@@ -106,8 +107,18 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
           )}
         </div>
 
-        {/* Right Side - Cher Chat Panel */}
+        {/* Right Side - Summary and Chat Panel */}
         <div className="chat-panel">
+          {/* Outfit Summary Panel */}
+          {hasGeneratedOutfit && (
+            <OutfitSummaryPanel
+              tripDetails={getTripDetails()}
+              reusabilityAnalysis={getReusabilityAnalysis()}
+              outfits={getOutfitDisplayData()}
+            />
+          )}
+
+          {/* Cher Chat Panel */}
           <CherChatPanel
             selectedTrip={selectedTrip}
             selectedOutfit={selectedOutfit}

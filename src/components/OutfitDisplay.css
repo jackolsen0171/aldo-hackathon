@@ -1,10 +1,11 @@
 /* OutfitDisplay Component Styles */
 
 .outfit-display {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    height: 100%;
     padding: 20px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    overflow-y: auto;
 }
 
 /* Loading State */
@@ -273,6 +274,8 @@
 .daily-outfits {
     display: grid;
     gap: 30px;
+    padding: 0;
+    margin: 0;
 }
 
 /* Daily Outfit Card */
@@ -282,6 +285,13 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid #f8f9fa;
+}
+
+.daily-outfit-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
 }
 
 .daily-outfit-card:hover {
@@ -844,5 +854,439 @@
     .reuse-indicator {
         background: #ddd !important;
         color: black !important;
+    }
+}/* New 
+Layout Styles */
+.outfit-card-content-new {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 30px;
+    padding: 20px;
+}
+
+/* Accessories Column (Left) */
+.accessories-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.column-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.accessories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.no-accessories {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #adb5bd;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.no-accessories .empty-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    opacity: 0.6;
+}
+
+.no-accessories .empty-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Accessory Item */
+.accessory-item {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.accessory-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.accessory-item.reused {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fff9 100%);
+}
+
+.accessory-image-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 8px auto;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.accessory-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.accessory-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.accessory-placeholder .placeholder-icon {
+    font-size: 1.5rem;
+}
+
+.accessory-reuse-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #28a745;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+}
+
+.accessory-details {
+    text-align: center;
+}
+
+.accessory-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.accessory-price {
+    font-size: 0.7rem;
+    color: #667eea;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.accessory-reuse-text {
+    font-size: 0.6rem;
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* Main Items Column (Center) */
+.main-items-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Main Outfit Item */
+.main-outfit-item {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.main-outfit-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.main-outfit-item.reused {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fff9 100%);
+}
+
+/* Main Item Image */
+.main-item-image-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+}
+
+.main-item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.image-placeholder .placeholder-icon {
+    font-size: 3rem;
+}
+
+.reuse-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.reuse-badge .reuse-icon {
+    font-size: 0.8rem;
+}
+
+/* Main Item Details */
+.main-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.item-header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-category-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.item-price-main {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.item-name-main {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.item-specs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.spec-item {
+    display: flex;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.spec-label {
+    font-weight: 600;
+    color: #6c757d;
+    min-width: 60px;
+}
+
+.spec-value {
+    color: #495057;
+    text-transform: capitalize;
+}
+
+.item-rationale {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.item-rationale h6 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.item-rationale p {
+    font-size: 0.9rem;
+    color: #495057;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.item-notes-main {
+    background: #fff3cd;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #ffc107;
+}
+
+.item-notes-main p {
+    font-size: 0.8rem;
+    color: #856404;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Overall Styling Notes */
+.overall-styling-notes {
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.styling-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.note-icon {
+    font-size: 1rem;
+    margin-top: 2px;
+}
+
+.note-text {
+    color: #495057;
+    line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .outfit-card-content-new {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .accessories-column {
+        order: 2;
+    }
+    
+    .main-items-column {
+        order: 1;
+    }
+    
+    .accessories-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .accessory-item {
+        flex: 0 0 auto;
+        width: 120px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-outfit-item {
+        grid-template-columns: 120px 1fr;
+        gap: 16px;
+        padding: 16px;
+    }
+    
+    .main-item-image-container {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .item-category-title {
+        font-size: 1rem;
+    }
+    
+    .item-price-main {
+        font-size: 1rem;
+    }
+    
+    .accessories-list {
+        gap: 8px;
+    }
+    
+    .accessory-item {
+        width: 100px;
+        padding: 8px;
+    }
+    
+    .accessory-image-container {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-outfit-item {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .main-item-image-container {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+    
+    .item-header-main {
+        justify-content: center;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .accessories-list {
+        justify-content: center;
     }
 }

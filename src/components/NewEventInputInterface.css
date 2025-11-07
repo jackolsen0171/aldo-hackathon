@@ -7,6 +7,82 @@
   min-height: 100%;
   padding: var(--spacing-2xl);
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated Background */
+.animated-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  opacity: 0.08;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.image-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  animation: scrollUp 20s linear infinite;
+  margin: 0 4px;
+  min-height: 200vh; /* Ensure enough height for seamless scrolling */
+}
+
+.image-column:nth-child(even) {
+  animation: scrollDown 25s linear infinite;
+}
+
+.image-column.column-0 { animation-duration: 18s; }
+.image-column.column-1 { animation-duration: 22s; }
+.image-column.column-2 { animation-duration: 20s; }
+.image-column.column-3 { animation-duration: 24s; }
+.image-column.column-4 { animation-duration: 19s; }
+
+@keyframes scrollUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scrollDown {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.image-wrapper {
+  margin-bottom: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  width: 100%;
+  height: 120px; /* Fixed height to prevent overlapping */
+}
+
+.background-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.background-image:hover {
+  transform: scale(1.02);
 }
 
 .input-container {
@@ -434,6 +510,19 @@
     padding-top: var(--spacing-2xl);
   }
 
+  .animated-background {
+    opacity: 0.05; /* Reduce opacity on mobile for better readability */
+  }
+
+  .image-column {
+    margin: 0 2px; /* Reduce spacing on mobile */
+  }
+
+  .image-wrapper {
+    margin-bottom: 8px; /* Reduce spacing between images */
+    height: 100px; /* Smaller height on mobile */
+  }
+
   .input-container {
     max-width: 100%;
     gap: var(--spacing-lg);
@@ -506,6 +595,19 @@
   .new-event-input-interface {
     padding: var(--spacing-base);
     padding-top: var(--spacing-xl);
+  }
+
+  .animated-background {
+    opacity: 0.03; /* Even more subtle on small screens */
+  }
+
+  .image-column {
+    margin: 0 1px; /* Minimal spacing on small screens */
+  }
+
+  .image-wrapper {
+    margin-bottom: 6px;
+    height: 80px; /* Smaller height on small screens */
   }
 
   .input-container {
@@ -759,6 +861,15 @@
   .character-count,
   .helper-text {
     transition: none;
+  }
+
+  /* Disable animated background for users who prefer reduced motion */
+  .image-column {
+    animation: none;
+  }
+
+  .animated-background {
+    opacity: 0.03; /* Make it very subtle when animations are disabled */
   }
 }
 

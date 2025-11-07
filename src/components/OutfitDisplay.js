@@ -54,32 +54,7 @@ const OutfitDisplay = ({
 
     return (
         <div className="outfit-display">
-            {/* Header with trip summary */}
-            <div className="outfit-display-header">
-                <h2>Your Outfit Recommendations</h2>
-                {tripDetails && (
-                    <div className="trip-summary">
-                        <div className="trip-info">
-                            <span className="trip-occasion">{tripDetails.occasion}</span>
-                            {tripDetails.location && (
-                                <span className="trip-location">📍 {tripDetails.location}</span>
-                            )}
-                            <span className="trip-duration">📅 {tripDetails.duration} days</span>
-                            <span className="trip-dress-code">👔 {tripDetails.dressCode}</span>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Reusability summary */}
-            {reusabilityAnalysis && (
-                <ReusabilityAnalysisCard
-                    reusabilityAnalysis={reusabilityAnalysis}
-                    outfits={outfits}
-                />
-            )}
-
-            {/* Daily outfits */}
+            {/* Daily outfits - Show these FIRST */}
             <div className="daily-outfits">
                 {outfits.dailyOutfits.map((dailyOutfit, index) => (
                     <DailyOutfitCard
@@ -93,71 +68,7 @@ const OutfitDisplay = ({
     );
 };
 
-const ReusabilityAnalysisCard = ({ reusabilityAnalysis, outfits }) => {
-    const { totalItems, reusedItems, reusabilityPercentage, reusabilityMap } = reusabilityAnalysis;
 
-    // Calculate packing benefits
-    const totalDays = outfits.dailyOutfits.length;
-    const itemsWithoutReuse = totalDays * (totalItems / totalDays);
-    const itemsSaved = Math.max(0, itemsWithoutReuse - totalItems);
-
-    // Get most reused items
-    const mostReusedItems = Object.entries(reusabilityMap)
-        .filter(([sku, days]) => days.length > 1)
-        .sort((a, b) => b[1].length - a[1].length)
-        .slice(0, 3);
-
-    return (
-        <div className="reusability-summary">
-            <div className="reusability-header">
-                <h3>🎒 Packing Optimization</h3>
-                <div className="reusability-percentage">
-                    {Math.round(reusabilityPercentage)}% reusability
-                </div>
-            </div>
-
-            <div className="reusability-stats">
-                <div className="stat-item">
-                    <span className="stat-number">{totalItems}</span>
-                    <span className="stat-label">Total Items</span>
-                </div>
-                <div className="stat-item">
-                    <span className="stat-number">{reusedItems}</span>
-                    <span className="stat-label">Reused Items</span>
-                </div>
-                <div className="stat-item">
-                    <span className="stat-number">{itemsSaved}</span>
-                    <span className="stat-label">Items Saved</span>
-                </div>
-            </div>
-
-            <p className="reusability-description">
-                Smart packing! You'll need {totalItems} items total, with {reusedItems} items
-                being reused across multiple days. This saves you {itemsSaved} items compared to unique outfits each day.
-            </p>
-
-            {mostReusedItems.length > 0 && (
-                <div className="most-reused-items">
-                    <h4>Most Versatile Items</h4>
-                    <div className="reused-items-list">
-                        {mostReusedItems.map(([sku, days]) => {
-                            // Find the item details from outfits
-                            const item = findItemBySku(outfits, sku);
-                            return (
-                                <div key={sku} className="reused-item-highlight">
-                                    <span className="item-name">{item?.name || 'Unknown Item'}</span>
-                                    <span className="reuse-count">
-                                        Used {days.length} times (Days {days.join(', ')})
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
 
 // Helper function to find item by SKU in outfits
 const findItemBySku = (outfits, sku) => {
@@ -195,6 +106,10 @@ const DailyOutfitCard = ({ dailyOutfit, reusabilityMap }) => {
         item && reusabilityMap[item.sku] && reusabilityMap[item.sku].length > 1
     ).length;
 
+    // Separate main items from accessories
+    const mainItems = ['topwear', 'outerwear', 'bottomwear', 'footwear'];
+    const accessories = outfit.accessories || [];
+
     return (
         <div className="daily-outfit-card">
             <div className="outfit-card-header">
@@ -213,43 +128,75 @@ const DailyOutfitCard = ({ dailyOutfit, reusabilityMap }) => {
                 </div>
             </div>
 
-            <div className="outfit-card-content">
-                {/* Outfit items organized by category */}
-                <div className="outfit-items">
-                    {renderOutfitByCategory(outfit, reusabilityMap)}
+            <div className="outfit-card-content-new">
+                {/* Left Column - Accessories */}
+                <div className="accessories-column">
+                    {accessories.length > 0 ? (
+                        <>
+                            <h4 className="column-title">👜 Accessories</h4>
+                            <div className="accessories-list">
+                                {accessories.map((accessory, index) => {
+                                    const isReused = reusabilityMap[accessory.sku] && reusabilityMap[accessory.sku].length > 1;
+                                    const reuseDays = reusabilityMap[accessory.sku] || [];
+                                    return (
+                                        <AccessoryItem
+                                            key={`accessory-${index}`}
+                                            item={accessory}
+                                            isReused={isReused}
+                                            reuseDays={reuseDays}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="no-accessories">
+                            <span className="empty-icon">👜</span>
+                            <span className="empty-text">No accessories</span>
+                        </div>
+                    )}
                 </div>
 
-                {/* Styling rationale */}
-                {styling && (
-                    <div className="styling-info">
-                        <h4>Styling Notes</h4>
-                        {styling.rationale && (
-                            <div className="styling-section">
-                                <h5>Why This Outfit Works</h5>
-                                <p className="styling-rationale">{styling.rationale}</p>
-                            </div>
-                        )}
-                        {styling.weatherConsiderations && (
-                            <div className="styling-section">
-                                <h5>Weather Considerations</h5>
-                                <div className="weather-considerations">
-                                    <span className="weather-icon">🌤️</span>
-                                    <span>{styling.weatherConsiderations}</span>
-                                </div>
-                            </div>
-                        )}
-                        {styling.dresscodeCompliance && (
-                            <div className="styling-section">
-                                <h5>Dress Code Compliance</h5>
-                                <div className="dresscode-compliance">
-                                    <span className="dresscode-icon">👔</span>
-                                    <span>{styling.dresscodeCompliance}</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                {/* Center Column - Main Outfit Items */}
+                <div className="main-items-column">
+                    {mainItems.map(category => {
+                        const item = outfit[category];
+                        if (!item) return null;
+
+                        const isReused = reusabilityMap[item.sku] && reusabilityMap[item.sku].length > 1;
+                        const reuseDays = reusabilityMap[item.sku] || [];
+
+                        return (
+                            <MainOutfitItem
+                                key={category}
+                                category={category}
+                                item={item}
+                                isReused={isReused}
+                                reuseDays={reuseDays}
+                                styling={styling}
+                            />
+                        );
+                    })}
+                </div>
             </div>
+
+            {/* Overall Styling Notes at Bottom */}
+            {styling && (styling.weatherConsiderations || styling.dresscodeCompliance) && (
+                <div className="overall-styling-notes">
+                    {styling.weatherConsiderations && (
+                        <div className="styling-note">
+                            <span className="note-icon">🌤️</span>
+                            <span className="note-text">{styling.weatherConsiderations}</span>
+                        </div>
+                    )}
+                    {styling.dresscodeCompliance && (
+                        <div className="styling-note">
+                            <span className="note-icon">👔</span>
+                            <span className="note-text">{styling.dresscodeCompliance}</span>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
@@ -463,3 +410,187 @@ const OutfitItem = ({ category, item, isReused, reuseDays, compact = false }) =>
 };
 
 export default OutfitDisplay;
+
+const MainOutfitItem = ({ category, item, isReused, reuseDays, styling }) => {
+    const categoryIcons = {
+        topwear: '👕',
+        bottomwear: '👖',
+        outerwear: '🧥',
+        footwear: '👟'
+    };
+
+    const categoryNames = {
+        topwear: 'Top',
+        bottomwear: 'Bottom',
+        outerwear: 'Outerwear',
+        footwear: 'Shoes'
+    };
+
+    // Generate image URL from SKU
+    const getImageUrl = (sku) => {
+        if (!sku) return null;
+        const match = sku.match(/SKU(\d+)/);
+        if (match) {
+            const imageNumber = match[1].padStart(3, '0');
+            return `/Images/${imageNumber}.png`;
+        }
+        return null;
+    };
+
+    const imageUrl = getImageUrl(item.sku);
+
+    const formatPrice = (price) => {
+        if (!price) return '';
+        return `$${parseFloat(price).toFixed(2)}`;
+    };
+
+    return (
+        <div className={`main-outfit-item ${isReused ? 'reused' : ''}`}>
+            {/* Left side - Large Image */}
+            <div className="main-item-image-container">
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={item.name}
+                        className="main-item-image"
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                        }}
+                    />
+                ) : null}
+                <div className="image-placeholder" style={{ display: imageUrl ? 'none' : 'flex' }}>
+                    <span className="placeholder-icon">{categoryIcons[category]}</span>
+                </div>
+
+                {/* Reuse indicator on image */}
+                {isReused && (
+                    <div className="reuse-badge">
+                        <span className="reuse-icon">🔄</span>
+                        <span className="reuse-text">Days {reuseDays.join(', ')}</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Right side - Item Details and Rationale */}
+            <div className="main-item-details">
+                <div className="item-header-main">
+                    <h4 className="item-category-title">
+                        {categoryIcons[category]} {categoryNames[category]}
+                    </h4>
+                    <span className="item-price-main">{formatPrice(item.price)}</span>
+                </div>
+
+                <h5 className="item-name-main">{item.name}</h5>
+
+                <div className="item-specs">
+                    {item.colors && (
+                        <div className="spec-item">
+                            <span className="spec-label">Color:</span>
+                            <span className="spec-value">{item.colors}</span>
+                        </div>
+                    )}
+                    {item.formality && (
+                        <div className="spec-item">
+                            <span className="spec-label">Style:</span>
+                            <span className="spec-value">{item.formality}</span>
+                        </div>
+                    )}
+                    {item.weatherSuitability && (
+                        <div className="spec-item">
+                            <span className="spec-label">Weather:</span>
+                            <span className="spec-value">{item.weatherSuitability}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Item-specific rationale */}
+                {styling?.rationale && (
+                    <div className="item-rationale">
+                        <h6>Why this piece works:</h6>
+                        <p>{getItemRationale(styling.rationale, category, item)}</p>
+                    </div>
+                )}
+
+                {item.notes && (
+                    <div className="item-notes-main">
+                        <p>{item.notes}</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const AccessoryItem = ({ item, isReused, reuseDays }) => {
+    const getImageUrl = (sku) => {
+        if (!sku) return null;
+        const match = sku.match(/SKU(\d+)/);
+        if (match) {
+            const imageNumber = match[1].padStart(3, '0');
+            return `/Images/${imageNumber}.png`;
+        }
+        return null;
+    };
+
+    const imageUrl = getImageUrl(item.sku);
+
+    return (
+        <div className={`accessory-item ${isReused ? 'reused' : ''}`}>
+            <div className="accessory-image-container">
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={item.name}
+                        className="accessory-image"
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                        }}
+                    />
+                ) : null}
+                <div className="accessory-placeholder" style={{ display: imageUrl ? 'none' : 'flex' }}>
+                    <span className="placeholder-icon">💍</span>
+                </div>
+
+                {isReused && (
+                    <div className="accessory-reuse-badge">
+                        <span>🔄</span>
+                    </div>
+                )}
+            </div>
+
+            <div className="accessory-details">
+                <h6 className="accessory-name">{item.name}</h6>
+                <span className="accessory-price">${parseFloat(item.price || 0).toFixed(2)}</span>
+                {isReused && (
+                    <span className="accessory-reuse-text">Days {reuseDays.join(', ')}</span>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// Helper function to extract item-specific rationale
+const getItemRationale = (fullRationale, category, item) => {
+    // This is a simplified version - in a real implementation, 
+    // you might have item-specific rationales from the AI
+    const categoryKeywords = {
+        topwear: ['shirt', 'top', 'blouse', 'sweater'],
+        bottomwear: ['pants', 'jeans', 'skirt', 'trousers'],
+        outerwear: ['jacket', 'blazer', 'coat', 'cardigan'],
+        footwear: ['shoes', 'boots', 'heels', 'sneakers']
+    };
+
+    // Extract sentences that mention this category or item
+    const sentences = fullRationale.split(/[.!?]+/);
+    const relevantSentences = sentences.filter(sentence => {
+        const lowerSentence = sentence.toLowerCase();
+        return categoryKeywords[category]?.some(keyword => lowerSentence.includes(keyword)) ||
+            lowerSentence.includes(item.name.toLowerCase());
+    });
+
+    return relevantSentences.length > 0
+        ? relevantSentences.join('. ').trim() + '.'
+        : `This ${category} provides the perfect balance of style and comfort for your occasion.`;
+};

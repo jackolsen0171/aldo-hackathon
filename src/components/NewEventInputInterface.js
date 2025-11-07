@@ -94,9 +94,50 @@ const NewEventInputInterface = ({
     const isSubmitDisabled = !inputValue.trim() || loading || chatLoading;
     const isProcessing = loading || chatLoading;
 
+    // Generate image paths for animated background
+    const generateImageColumns = () => {
+        const images = Array.from({ length: 30 }, (_, i) =>
+            `/Images/${String(i + 1).padStart(3, '0')}.png`
+        );
+
+        // Create 5 columns with shuffled images
+        const columns = [[], [], [], [], []];
+        images.forEach((img, idx) => {
+            columns[idx % 5].push(img);
+        });
+
+        return columns;
+    };
+
+    const imageColumns = generateImageColumns();
+
     return (
         <div className="new-event-input-interface" role="main" aria-label="New trip planning interface">
             <a href="#trip-input" className="skip-link">Skip to trip input</a>
+
+            {/* Animated Background */}
+            <div className="animated-background" aria-hidden="true">
+                {imageColumns.map((column, colIndex) => (
+                    <div
+                        key={colIndex}
+                        className={`image-column column-${colIndex}`}
+                        style={{ animationDelay: `${colIndex * -2}s` }}
+                    >
+                        {/* Duplicate images for seamless loop */}
+                        {[...column, ...column].map((imgPath, imgIndex) => (
+                            <div key={imgIndex} className="image-wrapper">
+                                <img
+                                    src={imgPath}
+                                    alt=""
+                                    loading="lazy"
+                                    className="background-image"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                ))}
+            </div>
+
             <div className="input-container">
                 {/* Header Section */}
                 <div className="input-header">

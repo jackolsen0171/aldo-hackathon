@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SavedTripsSidebar from '../components/SavedTripsSidebar';
 import MannequinOutfitBuilder from '../components/MannequinOutfitBuilder';
 import NewEventInputInterface from '../components/NewEventInputInterface';
+import EventConfirmationForm from '../components/EventConfirmationForm';
 import { initialAppState, mockTrips } from '../data/mockData';
 import { createNewTrip, isNewTrip, updateTrip, hasTransitionedToPopulated } from '../services/tripService';
 import chatService from '../services/chatService';
@@ -18,6 +19,10 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
   const [showOutfitTabs, setShowOutfitTabs] = useState(false);
   const [showOutfitBuilder, setShowOutfitBuilder] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Confirmation form state
+  const [showConfirmationForm, setShowConfirmationForm] = useState(false);
+  const [extractedEventData, setExtractedEventData] = useState(null);
 
   // Keep track of previous trip state for transition detection
   const previousTripRef = useRef(null);
@@ -90,6 +95,11 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
   const handleTripSelect = (tripId) => {
     setSelectedTrip(tripId);
     setSelectedOutfit(1); // Reset to outfit 1 when switching trips
+
+    // Reset confirmation form state when switching trips
+    setShowConfirmationForm(false);
+    setExtractedEventData(null);
+    setProcessingError(null);
   };
 
   const handleNewTrip = () => {
@@ -103,6 +113,11 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
     setSelectedTrip(newTrip.id);
     setSelectedOutfit(1);
 
+    // Reset confirmation form state for new trip
+    setShowConfirmationForm(false);
+    setExtractedEventData(null);
+    setProcessingError(null);
+
     console.log('Created new trip:', newTrip);
   };
 
@@ -111,6 +126,65 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
   };
 
   const clearProcessingError = () => {
+    setProcessingError(null);
+  };
+
+  const handleConfirmEventDetails = async (confirmedDetails) => {
+    setProcessingTrip(true);
+    setProcessingError(null);
+
+    try {
+      console.log('Confirmed event details:', confirmedDetails);
+
+      // Update the current trip with confirmed details
+      const updatedTrip = updateTrip(currentTrip, {
+        name: confirmedDetails.occasion || currentTrip.name,
+        destination: confirmedDetails.location || currentTrip.destination,
+        startDate: confirmedDetails.startDate || currentTrip.startDate,
+        totalDays: confirmedDetails.duration || currentTrip.totalDays,
+        eventData: {
+          ...extractedEventData,
+          ...confirmedDetails,
+          confirmed: true,
+          confirmedAt: new Date().toISOString()
+        }
+      });
+
+      // Update the trips array
+      setTrips(prevTrips =>
+        prevTrips.map(trip =>
+          trip.id === selectedTrip ? updatedTrip : trip
+        )
+      );
+
+      console.log('Trip updated with confirmed details:', updatedTrip);
+
+      // Hide confirmation form
+      setShowConfirmationForm(false);
+      setExtractedEventData(null);
+
+      // Now generate outfits with confirmed details
+      console.log('Starting outfit generation with confirmed details...');
+      try {
+        await generateOutfits(updatedTrip);
+        console.log('Outfit generation completed successfully');
+      } catch (outfitError) {
+        console.error('Outfit generation failed:', outfitError);
+        setProcessingError(`Failed to generate outfits: ${outfitError.message}`);
+      }
+
+    } catch (error) {
+      console.error('Error processing confirmed details:', error);
+      setProcessingError(error.message || 'Failed to process confirmed details. Please try again.');
+    } finally {
+      setProcessingTrip(false);
+    }
+  };
+
+  const handleCancelConfirmation = () => {
+    // Go back to input interface
+    setShowConfirmationForm(false);
+    setExtractedEventData(null);
     setProcessingError(null);
   };
 
@@ -131,13 +205,16 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
       if (result && result.success) {
         console.log('Chat service result:', result);
 
-        // If we got event context data, update the current trip
+        // If we got event context data, show confirmation form
         if (result.eventContext) {
           const eventData = result.eventContext;
 
           console.log('Event context received:', eventData);
 
-          // Update the current trip with extracted information
+          // Store the extracted event data for confirmation
+          setExtractedEventData(eventData);
+
+          // Update the current trip with basic information (but don't generate outfits yet)
           const updatedTrip = updateTrip(currentTrip, {
             name: eventData.occasion || eventData.eventType || currentTrip.name,
             destination: eventData.location || currentTrip.destination,
@@ -158,15 +235,8 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
 
           console.log('Trip updated with event data:', updatedTrip);
 
-          // Generate actual outfits using AI after successful event extraction
-          console.log('Starting outfit generation...');
-          try {
-            await generateOutfits(updatedTrip);
-            console.log('Outfit generation completed successfully');
-          } catch (outfitError) {
-            console.error('Outfit generation failed:', outfitError);
-            setProcessingError(`Failed to generate outfits: ${outfitError.message}`);
-          }
+          // Show confirmation form instead of immediately generating outfits
+          setShowConfirmationForm(true);
 
         } else {
           console.warn('No event context received from chat service');
@@ -199,14 +269,25 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
       const { default: bedrockAgentService } = await import('../services/bedrockAgentService');
       console.log('Services imported successfully');
 
-      // Test if services are configured
-      console.log('Testing service configuration...');
-      const bedrockConfig = bedrockAgentService.getConfigurationStatus();
-      console.log('Bedrock configuration:', bedrockConfig);
+      // Initialize context accumulator with trip data
+      console.log('Initializing context accumulator...');
+      const { default: contextAccumulator } = await import('../services/contextAccumulator');
 
-      // For now, skip the actual AI generation and use fallback
-      console.log('Skipping AI generation, using fallback outfits...');
-      throw new Error('AI generation temporarily disabled - using fallback outfits');
+      // Initialize context file for this session
+      const contextFile = contextAccumulator.initializeContextFile(trip.id, {
+        originalMessage: trip.description
+      });
+
+      // Add confirmed event details to context
+      contextAccumulator.addConfirmedDetails(trip.id, {
+        occasion: trip.eventData?.occasion || trip.name || 'Trip',
+        location: trip.destination || trip.eventData?.location,
+        startDate: trip.startDate,
+        duration: trip.totalDays || 3,
+        dressCode: trip.eventData?.dressCode || 'smart-casual',
+        budget: trip.eventData?.budget || null,
+        specialRequirements: trip.eventData?.specialRequirements || []
+      });
 
       // Generate outfits using the service
       console.log('Calling outfitGenerationService.generateOutfits...');
@@ -334,14 +415,14 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
               notes: "Straight-fit jeans suitable for casual and semi-casual settings."
             },
             footwear: {
-              sku: "SKU005",
-              name: "Black Leather Shoes",
+              sku: "SKU012",
+              name: "Leather Dress Shoes",
               category: "Footwear",
-              price: 90,
+              price: 130,
               colors: "black",
               weatherSuitability: "mild",
               formality: "formal",
-              notes: "Professional leather shoes for business settings."
+              notes: "Classic lace-up oxfords for professional occasions."
             },
             outerwear: day === 1 ? {
               sku: "SKU003",
@@ -454,7 +535,15 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
 
           {/* Conditional Main Area with Progressive Disclosure */}
           <div className="main-content-area">
-            {isCurrentTripNew || (!showOutfitBuilder && !isTransitioning) ? (
+            {showConfirmationForm ? (
+              /* Event Confirmation Form */
+              <EventConfirmationForm
+                eventData={extractedEventData}
+                onConfirm={handleConfirmEventDetails}
+                onCancel={handleCancelConfirmation}
+                loading={processingTrip}
+              />
+            ) : isCurrentTripNew || (!showOutfitBuilder && !isTransitioning) ? (
               /* New Event Input Interface for new/empty trips or during processing */
               <NewEventInputInterface
                 tripId={selectedTrip}
