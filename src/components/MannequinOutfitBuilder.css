@@ -8,10 +8,10 @@
 
 .builder-content {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 2fr 1.5fr;
   gap: 20px;
   height: calc(100vh - 160px);
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 10px;
 }
@@ -102,18 +102,108 @@
   transform: translateY(-2px);
 }
 
-/* Center Panel - Mannequin */
+/* Main Panel - Mannequin */
 .mannequin-container {
   background: white;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* Compact Outfit Info Header */
+.outfit-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.outfit-details-compact h3 {
+  color: #2c3e50;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.outfit-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 0.85rem;
+  color: #34495e;
+  margin-bottom: 8px;
+}
+
+.outfit-meta strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.outfit-name-input-compact {
+  width: 100%;
+  max-width: 300px;
+  padding: 6px 10px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: border-color 0.3s ease;
+}
+
+.outfit-name-input-compact:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.outfit-actions-compact {
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn-compact, .clear-btn-compact {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.save-btn-compact {
+  background: #27ae60;
+  color: white;
+}
+
+.save-btn-compact:hover {
+  background: #219a52;
+}
+
+.clear-btn-compact {
+  background: #e74c3c;
+  color: white;
+}
+
+.clear-btn-compact:hover {
+  background: #c0392b;
+}
+
+/* Mannequin Content Area */
+.mannequin-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mannequin {
@@ -301,8 +391,11 @@
 /* Right Panel - Chat Panel */
 .chat-panel {
   height: 100%;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 400px;
+  overflow: hidden;
 }
 
 /* Selection panel styles removed - replaced with chat panel */
@@ -345,18 +438,29 @@
 @media (max-width: 1200px) {
   .builder-content {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: 1fr auto;
     gap: 20px;
     min-height: auto;
     padding-bottom: 60px; /* More padding on mobile */
   }
   
-  .outfit-info-panel, .selections-panel {
+  .mannequin-container {
     padding: 20px;
   }
   
-  .mannequin-container {
-    padding: 20px;
+  .outfit-info-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .outfit-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .outfit-actions-compact {
+    justify-content: center;
   }
 }
 

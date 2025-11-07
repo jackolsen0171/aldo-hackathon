@@ -3,9 +3,11 @@
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   height: 100%;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0; /* Ensures flex child can shrink */
 }
 
 /* Chat Header */
@@ -61,6 +63,27 @@
   opacity: 0.9;
 }
 
+.chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clear-chat-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.clear-chat-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .chat-status {
   display: flex;
   align-items: center;
@@ -78,6 +101,11 @@
   animation: pulse 2s infinite;
 }
 
+.status-dot.offline {
+  background: #e74c3c;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.3);
+}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
@@ -90,6 +118,15 @@
   }
 }
 
+/* Chat Content Container */
+.chat-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Ensures flex child can shrink */
+}
+
 /* Chat Messages */
 .chat-messages {
   flex: 1;
@@ -99,6 +136,16 @@
   flex-direction: column;
   gap: 12px;
   background: #f8f9fa;
+  min-height: 0;
+  max-height: 100%;
+}
+
+/* Form Message Container */
+.form-message {
+  margin: 12px 0;
+  align-self: stretch;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .message {
@@ -180,6 +227,92 @@
   }
 }
 
+/* Error Display */
+.chat-error {
+  background: #fee;
+  color: #c33;
+  padding: 12px 15px;
+  font-size: 0.9rem;
+  border: 1px solid #fcc;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 15px;
+  border-radius: 8px;
+}
+
+.error-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+}
+
+.error-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.error-text {
+  line-height: 1.4;
+}
+
+.error-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.retry-btn,
+.dismiss-btn {
+  background: none;
+  border: none;
+  color: #c33;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover,
+.dismiss-btn:hover {
+  background: rgba(204, 51, 51, 0.1);
+}
+
+/* Service Status */
+.service-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  margin: 0 15px;
+  border-radius: 6px;
+}
+
+.service-status.offline {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.status-indicator {
+  font-size: 0.8rem;
+}
+
+/* Message Status */
+.message-status {
+  font-size: 0.7rem;
+  margin-top: 2px;
+  display: block;
+}
+
+.message-status.failed {
+  color: #e74c3c;
+}
+
 /* Chat Input */
 .chat-input-form {
   padding: 15px;
@@ -205,6 +338,12 @@
 
 .chat-input:focus {
   border-color: #667eea;
+}
+
+.chat-input:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 
 .send-button {
@@ -238,6 +377,66 @@
   width: 20px;
   height: 20px;
   object-fit: contain;
+}
+
+/* Event Details Form Integration */
+.cher-chat-panel .form-message .event-details-form {
+  margin: 0;
+  max-width: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.cher-chat-panel .form-message .event-details-form .pipeline-progress {
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.cher-chat-panel .form-message .event-details-form .form-row {
+  gap: 8px;
+}
+
+.cher-chat-panel .form-message .event-details-form .form-group input,
+.cher-chat-panel .form-message .event-details-form .form-group select {
+  padding: 6px 8px;
+  font-size: 0.8rem;
+}
+
+.cher-chat-panel .form-message .event-details-form .form-header {
+  padding: 12px 16px 0 16px;
+}
+
+.cher-chat-panel .form-message .event-details-form .event-form {
+  padding: 0 16px 16px 16px;
+}
+
+.cher-chat-panel .form-message .event-details-form .form-header h4 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.cher-chat-panel .form-message .event-details-form .form-header p {
+  font-size: 0.8rem;
+  margin-bottom: 0;
+}
+
+/* Compact form elements */
+.cher-chat-panel .form-message .event-details-form .form-group label {
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.cher-chat-panel .form-message .event-details-form .form-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.cher-chat-panel .form-message .event-details-form .cancel-btn,
+.cher-chat-panel .form-message .event-details-form .confirm-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
 }
 
 /* Chat Context */
@@ -316,5 +515,22 @@
     width: 35px;
     height: 35px;
     font-size: 1rem;
+  }
+  
+  /* Mobile form adjustments */
+  .cher-chat-panel .form-message .event-details-form {
+    border-radius: 6px;
+  }
+  
+  .cher-chat-panel .form-message .event-details-form .pipeline-progress {
+    padding: 12px;
+  }
+  
+  .cher-chat-panel .form-message .event-details-form .form-header {
+    padding: 12px 16px 0 16px;
+  }
+  
+  .cher-chat-panel .form-message .event-details-form .event-form {
+    padding: 0 16px 16px 16px;
   }
 }
