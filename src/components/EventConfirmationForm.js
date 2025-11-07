@@ -216,18 +216,14 @@ const EventConfirmationForm = ({
                     </button>
                 </div>
             </form>
-
-            {/* Clarifications */}
-            {eventData?.needsClarification && eventData.needsClarification.length > 0 && (
-                <div className="clarifications-notice">
-                    <h4>Please clarify:</h4>
-                    <ul>
+                {eventData?.needsClarification && eventData.needsClarification.length > 0 && (
+                    <div className="clarifications-inline">
+                        <span>Missing:</span>
                         {eventData.needsClarification.map((item, index) => (
-                            <li key={index}>{item}</li>
+                            <strong key={index}>{item}</strong>
                         ))}
-                    </ul>
-                </div>
-            )}
+                    </div>
+                )}
         </div>
     );
 };

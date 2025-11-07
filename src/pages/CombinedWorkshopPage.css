@@ -191,6 +191,11 @@
   overflow-y: auto;
 }
 
+.middle-column {
+  max-height: none;
+  overflow: visible;
+}
+
 .left-column {
   background: linear-gradient(180deg, #fdeee4 0%, #f6d9cf 100%);
   color: var(--aldo-text);
@@ -285,6 +290,31 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
+  height: 100%;
+}
+
+
+.finalize-bar {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+}
+
+.finalize-btn {
+  border: 1px solid var(--aldo-outline);
+  border-radius: 999px;
+  padding: 10px 20px;
+  background: var(--aldo-text);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.finalize-btn:hover {
+  transform: translateY(-1px);
 }
 
 .middle-placeholder {
@@ -497,4 +527,100 @@
     width: 100%;
     justify-content: space-between;
   }
+}
+.packing-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  border: 1px solid var(--aldo-outline);
+  padding: 16px;
+  overflow: hidden;
+}
+
+.packing-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  border: 1px solid var(--aldo-outline);
+}
+
+.packing-summary h4 {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--aldo-muted);
+}
+
+.packing-summary strong {
+  font-size: 1.2rem;
+}
+
+.packing-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.packing-card {
+  border: 1px solid var(--aldo-outline);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.packing-image {
+  width: 100%;
+  height: 130px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f4f4f4;
+}
+
+.packing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.packing-image-fallback {
+  display: none;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.packing-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.packing-tags {
+  font-size: 0.75rem;
+  color: var(--aldo-muted);
+}
+
+.packing-source {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.packing-source.closet {
+  color: #219a52;
+}
+
+.packing-source.catalog {
+  color: #c0392b;
 }

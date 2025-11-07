@@ -240,22 +240,20 @@
   border-radius: 8px;
 }
 
-.clarifications-notice h4 {
-  margin: 0 0 8px 0;
+.clarifications-inline {
+  margin-top: 12px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
   color: #856404;
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.clarifications-notice ul {
-  margin: 0;
-  padding-left: 20px;
-  color: #856404;
-}
-
-.clarifications-notice li {
-  margin-bottom: 4px;
-  font-size: 0.9rem;
+.clarifications-inline strong {
+  font-weight: 700;
 }
 
 /* Responsive Design */

@@ -242,11 +242,44 @@
     padding: 16px;
 }
 
-.accessories-block ul {
-    margin: 8px 0 0;
-    padding-left: 18px;
-    color: var(--aldo-text);
-    line-height: 1.5;
+.accessories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.accessory-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--aldo-outline);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+
+.accessory-image {
+    width: 100%;
+    height: 90px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f3f3f3;
+}
+
+.accessory-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.accessory-image-fallback {
+    display: none;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
 }
 
 .rationale {

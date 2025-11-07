@@ -31,6 +31,7 @@ const CombinedWorkshopPage = () => {
   const [savedSkus, setSavedSkus] = useState(() => new Set());
   const [savedItems, setSavedItems] = useState([]);
   const [showClosetInventory, setShowClosetInventory] = useState(false);
+  const [showPackingList, setShowPackingList] = useState(false);
   const closetRef = useRef(null);
 
   const currentTrip = useMemo(
@@ -275,6 +276,7 @@ const CombinedWorkshopPage = () => {
           savedSkus={savedSkus}
           onSaveItems={handleSaveItems}
           getClosetCenter={() => closetRef.current?.getClosetCenter?.()}
+          dailyPlans={currentTrip.eventData?.dailyPlans}
         />
       );
     }
@@ -362,7 +364,31 @@ const CombinedWorkshopPage = () => {
             )}
           </div>
           <div className="middle-content">
-            {renderMiddleColumn()}
+            {showPackingList ? (
+              <>
+                <PackingList
+                  trip={currentTrip}
+                  savedSkus={savedSkus}
+                  savedItems={savedItems}
+                />
+                <div className="finalize-bar">
+                  <button className="finalize-btn" onClick={() => setShowPackingList(false)}>
+                    ← Back to outfits
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {renderMiddleColumn()}
+                {hasGeneratedOutfits && (
+                  <div className="finalize-bar">
+                    <button className="finalize-btn" onClick={() => setShowPackingList(true)}>
+                      View packing list →
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
 
@@ -432,3 +458,104 @@ const getSkuImagePath = (sku) => {
 };
 
 export default CombinedWorkshopPage;
+const summarizePackingList = (trip, savedSkus) => {
+  if (!trip?.outfits) return { items: [], totals: { closet: 0, catalog: 0, price: 0 } };
+
+  const seen = new Map();
+  Object.values(trip.outfits).forEach(outfit => {
+    const addItem = (item, type) => {
+      if (!item || !item.sku) return;
+      const key = item.sku;
+      if (!seen.has(key)) {
+        seen.set(key, { ...item, count: 1, types: new Set([type]) });
+      } else {
+        const entry = seen.get(key);
+        entry.count += 1;
+        entry.types.add(type);
+      }
+    };
+
+    addItem(outfit.items?.topwear, 'topwear');
+    addItem(outfit.items?.outerwear, 'outerwear');
+    addItem(outfit.items?.bottomwear, 'bottomwear');
+    addItem(outfit.items?.footwear, 'footwear');
+    outfit.items?.accessories?.forEach(acc => addItem(acc, 'accessories'));
+  });
+
+  let closet = 0;
+  let catalog = 0;
+  let price = 0;
+  const items = Array.from(seen.values()).map(entry => {
+    const fromCloset = savedSkus.has(entry.sku);
+    if (fromCloset) closet += 1; else catalog += 1;
+    const numericPrice = entry.price ? Number(entry.price) : 0;
+    price += numericPrice;
+    return {
+      ...entry,
+      types: Array.from(entry.types),
+      fromCloset
+    };
+  });
+
+  return {
+    items,
+    totals: {
+      closet,
+      catalog,
+      price: Math.round(price)
+    }
+  };
+};
+
+const PackingList = ({ trip, savedSkus, savedItems }) => {
+  const data = summarizePackingList(trip, savedSkus);
+
+  if (!data.items.length) {
+    return (
+      <div className="packing-list empty">
+        <p>No packing list available yet. Generate outfits first.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="packing-list">
+      <div className="packing-summary">
+        <div>
+          <h4>Total items</h4>
+          <strong>{data.items.length}</strong>
+        </div>
+        <div>
+          <h4>Closet</h4>
+          <strong>{data.totals.closet}</strong>
+        </div>
+        <div>
+          <h4>Catalog</h4>
+          <strong>{data.totals.catalog}</strong>
+        </div>
+        <div>
+          <h4>Est. cost</h4>
+          <strong>${data.totals.price}</strong>
+        </div>
+      </div>
+      <div className="packing-grid">
+        {data.items.map(item => (
+          <div key={item.sku} className="packing-card">
+            <div className="packing-image">
+              <img src={getSkuImagePath(item.sku)} alt={item.name} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+              <div className="packing-image-fallback">{item.name?.[0]}</div>
+            </div>
+            <div className="packing-meta">
+              <strong>{item.name}</strong>
+              {item.colors && <span>{item.colors}</span>}
+              <span className="packing-tags">{item.types.join(', ')}</span>
+              <span className={`packing-source ${item.fromCloset ? 'closet' : 'catalog'}`}>
+                {item.fromCloset ? 'In closet' : 'Add to cart'}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

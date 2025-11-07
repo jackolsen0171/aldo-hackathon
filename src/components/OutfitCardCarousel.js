@@ -59,7 +59,8 @@ const OutfitCardCarousel = ({
     trip,
     savedSkus = new Set(),
     onSaveItems = () => {},
-    getClosetCenter = () => ({ x: 0, y: 0 })
+    getClosetCenter = () => ({ x: 0, y: 0 }),
+    dailyPlans = []
 }) => {
     const outfits = useMemo(() => {
         if (!trip?.outfits) {
@@ -107,7 +108,7 @@ const OutfitCardCarousel = ({
             <header className="carousel-header">
                 <div>
                     <p className="eyebrow">Day {currentOutfit.day || currentIndex + 1}</p>
-                    <h3>{currentOutfit.occasion || trip?.eventData?.occasion || 'Styled look'}</h3>
+                    <h3>{dailyPlans?.[currentIndex]?.activity || currentOutfit.occasion || trip?.eventData?.occasion || 'Styled look'}</h3>
                 </div>
                 <div className="header-meta">
                     {trip?.destination && <span>{trip.destination}</span>}
@@ -125,6 +126,7 @@ const OutfitCardCarousel = ({
                         aria-current={index === currentIndex ? 'true' : 'false'}
                     >
                         Day {outfit.day || index + 1}
+                        {dailyPlans?.[index]?.activity ? ` · ${dailyPlans[index].activity}` : ''}
                     </button>
                 ))}
             </div>
@@ -152,14 +154,22 @@ const OutfitCardCarousel = ({
                 {accessories.length > 0 && (
                     <div className="accessories-block">
                         <span className="chip-label">Accessories</span>
-                        <ul>
+                        <div className="accessories-grid">
                             {accessories.map((accessory, idx) => (
-                                <li key={`${accessory.sku || idx}`}>
+                                <div key={`${accessory.sku || idx}`} className="accessory-card">
+                                    <div className="accessory-image">
+                                        <img
+                                            src={getSkuImagePath(accessory.sku)}
+                                            alt={accessory.name}
+                                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                        />
+                                        <div className="accessory-image-fallback">{accessory.name?.[0]}</div>
+                                    </div>
                                     <strong>{accessory.name}</strong>
-                                    {accessory.colors && <span> • {accessory.colors}</span>}
-                                </li>
+                                    {accessory.colors && <span>{accessory.colors}</span>}
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 )}
 
