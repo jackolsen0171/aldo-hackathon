@@ -214,7 +214,7 @@ export const useChat = () => {
      */
     const addMessage = useCallback((message) => {
         const newMessage = {
-            id: Date.now(),
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             type: 'ai',
             status: 'delivered',
             timestamp: new Date().toISOString(),

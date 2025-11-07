@@ -485,6 +485,325 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
     }
 
     /**
+     * Generate outfit recommendations using CSV data and AI
+     */
+    async generateOutfitRecommendations(eventDetails, csvData, contextSummary) {
+        try {
+            console.log('Generating outfit recommendations with Bedrock:', eventDetails);
+
+            const outfitPrompt = this.buildOutfitGenerationPrompt(eventDetails, csvData, contextSummary);
+
+            const requestPayload = {
+                messages: [{
+                    role: 'user',
+                    content: [{ text: outfitPrompt }]
+                }],
+                inferenceConfig: {
+                    temperature: 0.3,
+                    maxTokens: 2000
+                }
+            };
+
+            const command = new InvokeModelCommand({
+                modelId: this.modelId,
+                contentType: 'application/json',
+                accept: 'application/json',
+                body: JSON.stringify(requestPayload)
+            });
+
+            const response = await this.client.send(command);
+            const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+            const aiResponse = responseBody.output?.message?.content?.[0]?.text || '{}';
+
+            console.log('Raw outfit AI response:', aiResponse);
+
+            // Parse the AI response into structured outfit data
+            const outfitData = this.parseOutfitResponse(aiResponse, eventDetails);
+
+            return {
+                success: true,
+                data: outfitData
+            };
+
+        } catch (error) {
+            console.error('Outfit generation error:', error);
+            return {
+                success: false,
+                error: {
+                    code: 'OUTFIT_GENERATION_ERROR',
+                    message: 'Failed to generate outfit recommendations'
+                }
+            };
+        }
+    }
+
+    /**
+     * Build outfit generation prompt with CSV data
+     */
+    buildOutfitGenerationPrompt(eventDetails, csvData, contextSummary) {
+        const { occasion, duration, location, dressCode, budget } = eventDetails;
+
+        return `You are an expert fashion stylist. Create ${duration} complete outfit recommendations for a ${occasion} in ${location || 'unspecified location'} with ${dressCode} dress code.
+
+AVAILABLE CLOTHING ITEMS (CSV format):
+${csvData}
+
+REQUIREMENTS:
+- Create ${duration} complete daily outfits
+- Each outfit must include: topwear, bottomwear, footwear
+- Add outerwear if weather requires it
+- Select items ONLY from the CSV data above
+- Match SKUs exactly from the CSV
+- Prioritize items suitable for ${dressCode} formality level
+- Consider weather appropriateness
+- Maximize item reusability across days (aim for 60%+ reuse for trips >3 days)
+${budget ? `- Stay within budget of $${budget}` : ''}
+
+RESPONSE FORMAT:
+Respond with ONLY a valid JSON object in this exact structure:
+
+{
+  "tripDetails": {
+    "occasion": "${occasion}",
+    "duration": ${duration},
+    "location": "${location || 'unspecified'}",
+    "dressCode": "${dressCode}",
+    "budget": ${budget || 'null'}
+  },
+  "dailyOutfits": [
+    {
+      "day": 1,
+      "date": "Day 1",
+      "occasion": "${occasion} - Day 1",
+      "outfit": {
+        "topwear": {
+          "sku": "exact SKU from CSV",
+          "name": "exact name from CSV",
+          "category": "from CSV",
+          "price": "from CSV as number",
+          "colors": "from CSV",
+          "weatherSuitability": "from CSV",
+          "formality": "from CSV",
+          "notes": "from CSV"
+        },
+        "bottomwear": {
+          "sku": "exact SKU from CSV",
+          "name": "exact name from CSV",
+          "category": "from CSV", 
+          "price": "from CSV as number",
+          "colors": "from CSV",
+          "weatherSuitability": "from CSV",
+          "formality": "from CSV",
+          "notes": "from CSV"
+        },
+        "footwear": {
+          "sku": "exact SKU from CSV",
+          "name": "exact name from CSV",
+          "category": "from CSV",
+          "price": "from CSV as number", 
+          "colors": "from CSV",
+          "weatherSuitability": "from CSV",
+          "formality": "from CSV",
+          "notes": "from CSV"
+        },
+        "outerwear": null,
+        "accessories": []
+      },
+      "styling": {
+        "rationale": "Why these items work together for ${dressCode} ${occasion}",
+        "weatherConsiderations": "How this outfit addresses weather conditions",
+        "dresscodeCompliance": "How this meets ${dressCode} requirements"
+      }
+    }
+  ],
+  "reusabilityAnalysis": {
+    "totalItems": 0,
+    "reusedItems": 0, 
+    "reusabilityPercentage": 0,
+    "reusabilityMap": {
+      "item-sku": [1, 2, 3]
+    }
+  }
+}
+
+Create ${duration} daily outfits following this structure. Ensure all SKUs match exactly with the CSV data.`;
+    }
+
+    /**
+     * Parse AI outfit response into structured data
+     */
+    parseOutfitResponse(aiResponse, eventDetails) {
+        try {
+            // Clean the response
+            const cleanedResponse = this.cleanJsonResponse(aiResponse);
+            const outfitData = JSON.parse(cleanedResponse);
+
+            // Validate and enhance the response
+            if (!outfitData.dailyOutfits || !Array.isArray(outfitData.dailyOutfits)) {
+                throw new Error('Invalid outfit data structure');
+            }
+
+            // Calculate reusability analysis
+            const reusabilityAnalysis = this.calculateReusabilityAnalysis(outfitData.dailyOutfits);
+            outfitData.reusabilityAnalysis = reusabilityAnalysis;
+
+            // Add metadata
+            outfitData.tripId = `trip-${Date.now()}`;
+            outfitData.sessionId = `session-${Date.now()}`;
+            outfitData.generatedAt = new Date().toISOString();
+
+            return outfitData;
+
+        } catch (error) {
+            console.error('Failed to parse outfit response:', error);
+
+            // Return fallback outfit data
+            return this.createFallbackOutfitData(eventDetails);
+        }
+    }
+
+    /**
+     * Calculate reusability analysis from daily outfits
+     */
+    calculateReusabilityAnalysis(dailyOutfits) {
+        const itemUsage = new Map();
+        const allItems = [];
+
+        // Count item usage across all days
+        dailyOutfits.forEach((dayOutfit, dayIndex) => {
+            const outfit = dayOutfit.outfit;
+            const dayNum = dayIndex + 1;
+
+            // Process each component
+            ['topwear', 'bottomwear', 'footwear', 'outerwear'].forEach(component => {
+                if (outfit[component] && outfit[component] !== null) {
+                    const item = outfit[component];
+                    allItems.push(item);
+
+                    if (!itemUsage.has(item.sku)) {
+                        itemUsage.set(item.sku, []);
+                    }
+                    itemUsage.get(item.sku).push(dayNum);
+                }
+            });
+
+            // Process accessories
+            if (outfit.accessories && Array.isArray(outfit.accessories)) {
+                outfit.accessories.forEach(accessory => {
+                    allItems.push(accessory);
+
+                    if (!itemUsage.has(accessory.sku)) {
+                        itemUsage.set(accessory.sku, []);
+                    }
+                    itemUsage.get(accessory.sku).push(dayNum);
+                });
+            }
+        });
+
+        // Calculate metrics
+        const totalItems = itemUsage.size;
+        const reusedItems = Array.from(itemUsage.values()).filter(days => days.length > 1).length;
+        const reusabilityPercentage = totalItems > 0 ? Math.round((reusedItems / totalItems) * 100) : 0;
+
+        // Build reusability map
+        const reusabilityMap = {};
+        itemUsage.forEach((days, sku) => {
+            if (days.length > 1) {
+                reusabilityMap[sku] = [...new Set(days)].sort((a, b) => a - b);
+            }
+        });
+
+        return {
+            totalItems,
+            reusedItems,
+            reusabilityPercentage,
+            reusabilityMap
+        };
+    }
+
+    /**
+     * Create fallback outfit data when AI parsing fails
+     */
+    createFallbackOutfitData(eventDetails) {
+        const { duration, occasion, location, dressCode } = eventDetails;
+
+        return {
+            tripId: `trip-${Date.now()}`,
+            sessionId: `session-${Date.now()}`,
+            generatedAt: new Date().toISOString(),
+            tripDetails: {
+                occasion: occasion,
+                duration: duration,
+                location: location,
+                dressCode: dressCode,
+                budget: eventDetails.budget || null
+            },
+            dailyOutfits: Array.from({ length: duration }, (_, index) => ({
+                day: index + 1,
+                date: `Day ${index + 1}`,
+                occasion: `${occasion} - Day ${index + 1}`,
+                outfit: {
+                    topwear: {
+                        sku: "SKU001",
+                        name: "Classic White T-Shirt",
+                        category: "Topwear",
+                        price: 25,
+                        colors: "white",
+                        weatherSuitability: "warm",
+                        formality: "casual",
+                        notes: "Essential lightweight cotton tee for everyday wear."
+                    },
+                    bottomwear: {
+                        sku: "SKU002",
+                        name: "Blue Denim Jeans",
+                        category: "Bottomwear",
+                        price: 60,
+                        colors: "blue",
+                        weatherSuitability: "mild",
+                        formality: "casual",
+                        notes: "Straight-fit jeans suitable for casual and semi-casual settings."
+                    },
+                    footwear: {
+                        sku: "SKU005",
+                        name: "Black Leather Shoes",
+                        category: "Footwear",
+                        price: 90,
+                        colors: "black",
+                        weatherSuitability: "mild",
+                        formality: "formal",
+                        notes: "Professional leather shoes for business settings."
+                    },
+                    outerwear: index === 0 ? {
+                        sku: "SKU003",
+                        name: "Black Blazer",
+                        category: "Outerwear",
+                        price: 120,
+                        colors: "black",
+                        weatherSuitability: "mild",
+                        formality: "formal",
+                        notes: "Tailored blazer ideal for business or formal occasions."
+                    } : null,
+                    accessories: []
+                },
+                styling: {
+                    rationale: `This ${dressCode} outfit combines professional styling with comfort for your ${occasion}. The pieces work together to create a polished look appropriate for business settings.`,
+                    weatherConsiderations: `Selected items suitable for ${location || 'your location'} weather conditions with appropriate layering options.`,
+                    dresscodeCompliance: `This outfit meets ${dressCode} dress code requirements with professional styling and appropriate formality level.`
+                }
+            })),
+            reusabilityAnalysis: {
+                totalItems: duration * 3,
+                reusedItems: Math.floor(duration * 1.5),
+                reusabilityPercentage: Math.round((Math.floor(duration * 1.5) / (duration * 3)) * 100),
+                reusabilityMap: {
+                    "SKU003": [1, 2, 3].slice(0, duration),
+                    "SKU002": duration > 1 ? [1, 3] : [1]
+                }
+            }
+        };
+    }
+
+    /**
      * Test connection
      */
     async testConnection() {

@@ -66,10 +66,11 @@ const EventDetailsForm = ({
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (onConfirm) {
-            onConfirm(formData);
+            // Call onConfirm with form data - this will trigger outfit generation
+            await onConfirm(formData);
         }
     };
 

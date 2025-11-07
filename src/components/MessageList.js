@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import EventDetailsForm from './EventDetailsForm';
+import OutfitDisplay from './OutfitDisplay';
 import './MessageList.css';
 
 const MessageList = ({ messages, loading, onEventConfirm, onEventCancel }) => {
@@ -47,6 +48,19 @@ const MessageList = ({ messages, loading, onEventConfirm, onEventCancel }) => {
                                         }
                                     }}
                                     loading={message.pipelineLoading || false}
+                                />
+                            </div>
+                        ) : message.type === 'outfit-recommendations' && message.outfitData ? (
+                            <div className="outfit-recommendations-message">
+                                <div className="ai-response-text">
+                                    {message.content}
+                                </div>
+                                <OutfitDisplay
+                                    outfits={message.outfitData}
+                                    tripDetails={message.outfitData.tripDetails}
+                                    reusabilityAnalysis={message.outfitData.reusabilityAnalysis}
+                                    loading={false}
+                                    error={null}
                                 />
                             </div>
                         ) : (

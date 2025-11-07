@@ -410,13 +410,23 @@ class PipelineService {
             const contextFile = contextAccumulator.getContextFile(sessionId);
             const contextSummary = contextFile ? contextAccumulator.generateContextSummary(sessionId) : null;
 
-            // Here we would integrate with OutfitGenerator using the context
-            // For now, simulate completion
+            // Import and use OutfitGenerationService
+            const { default: outfitGenerationService } = await import('./OutfitGenerationService');
+
+            // Generate outfits using the service
+            const generationResult = await outfitGenerationService.generateOutfits(sessionId, confirmedDetails);
+
+            if (!generationResult.success) {
+                throw new Error(generationResult.error?.message || 'Outfit generation failed');
+            }
+
+            // Update state to complete with generated recommendations
             const completedState = {
                 ...state,
                 stage: PIPELINE_STAGES.COMPLETE,
-                outfitRecommendations: [], // Would be populated by OutfitGenerator
+                outfitRecommendations: generationResult.data || [],
                 contextSummary: contextSummary,
+                generationData: generationResult.data,
                 lastActivity: new Date().toISOString()
             };
 
@@ -425,8 +435,9 @@ class PipelineService {
             return {
                 success: true,
                 state: completedState,
-                recommendations: completedState.outfitRecommendations,
-                contextSummary: contextSummary
+                recommendations: generationResult.data,
+                contextSummary: contextSummary,
+                generationResult: generationResult
             };
 
         } catch (error) {

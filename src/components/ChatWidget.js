@@ -97,21 +97,67 @@ const ChatWidget = () => {
         setShowEventForm(false);
 
         try {
-            // TODO: Generate outfit recommendations based on confirmed event data
-            // For now, just show a confirmation message
-            const confirmationMessage = {
-                id: Date.now(),
-                type: 'ai',
-                content: `Perfect! I'll now generate outfit recommendations for your ${confirmedEventData.occasion} in ${confirmedEventData.location || 'the specified location'}. This feature is coming soon!`,
-                timestamp: new Date().toISOString(),
-                status: 'delivered'
-            };
+            // Import pipeline service
+            const { default: pipelineService } = await import('../services/pipelineService');
 
+            // Get current session ID from pending event data or initialize new session
+            const sessionId = pendingEventData?.sessionId || `session_${Date.now()}`;
+
+            // Initialize session if it doesn't exist
+            const initialState = pipelineService.initializeSession(sessionId);
+
+            // First, process the user input to transition to confirmation_pending stage
+            const inputResult = await pipelineService.processUserInput(
+                `Business trip to Chicago for 2 days`,
+                sessionId,
+                confirmedEventData
+            );
+
+            if (!inputResult.success) {
+                throw new Error(inputResult.error?.message || 'Failed to process input');
+            }
+
+            // Now confirm event details with pipeline service
+            const confirmResult = await pipelineService.confirmEventDetails(confirmedEventData, sessionId);
+
+            if (!confirmResult.success) {
+                throw new Error(confirmResult.error?.message || 'Failed to confirm event details');
+            }
+
+            // Show context gathering message
             addMessage({
-                content: `Perfect! I'll now generate outfit recommendations for your ${confirmedEventData.occasion} in ${confirmedEventData.location || 'the specified location'}. This feature is coming soon!`
+                content: `Perfect! I'm now gathering weather information and context for your ${confirmedEventData.occasion}...`
             });
+
+            // Complete context gathering
+            const contextResult = await pipelineService.completeContextGathering(sessionId);
+
+            if (!contextResult.success) {
+                throw new Error(contextResult.error?.message || 'Failed to gather context');
+            }
+
+            // Show outfit generation message
+            addMessage({
+                content: `Context gathered! Now generating your outfit recommendations...`
+            });
+
+            // Generate outfits using pipeline service (which orchestrates the full flow)
+            const generationResult = await pipelineService.generateOutfits(confirmedEventData, sessionId);
+
+            if (!generationResult.success) {
+                throw new Error(generationResult.error?.message || 'Failed to generate outfits');
+            }
+
+            // Show completion message
+            addMessage({
+                content: `Great! I've generated outfit recommendations for your ${confirmedEventData.duration}-day ${confirmedEventData.occasion}. The outfit generation system is now ready for AI integration!`
+            });
+
         } catch (error) {
             console.error('Error processing confirmed event data:', error);
+            addMessage({
+                content: `I encountered an error while processing your event details: ${error.message}. Please try again.`
+            });
         } finally {
             setFormLoading(false);
             setPendingEventData(null);

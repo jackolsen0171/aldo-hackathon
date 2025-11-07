@@ -480,6 +480,29 @@
   background: #95a5a6;
 }
 
+/* Outfit Recommendations Message */
+.outfit-recommendations-message {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 100%;
+}
+
+.outfit-recommendations-message p {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #333;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+/* Adjust message width for outfit recommendations */
+.message.cher:has(.outfit-recommendations-message) {
+  max-width: 95%;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .chat-header {
@@ -532,5 +555,15 @@
   
   .cher-chat-panel .form-message .event-details-form .event-form {
     padding: 0 16px 16px 16px;
+  }
+  
+  /* Mobile outfit recommendations */
+  .message.cher:has(.outfit-recommendations-message) {
+    max-width: 98%;
+  }
+  
+  .outfit-recommendations-message p {
+    padding: 10px 12px;
+    font-size: 0.9rem;
   }
 }
