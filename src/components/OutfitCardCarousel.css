@@ -99,6 +99,26 @@
     gap: 12px;
 }
 
+.scrollable-grid {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+    position: relative;
+}
+
+.scrollable-grid::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 70%);
+    pointer-events: none;
+    display: block;
+    border-radius: 0 0 14px 14px;
+}
+
 .outfit-flip-card {
     perspective: 1200px;
     display: flex;

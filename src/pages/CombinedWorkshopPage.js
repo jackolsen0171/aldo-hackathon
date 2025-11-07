@@ -29,7 +29,57 @@ const CombinedWorkshopPage = () => {
   const [showConfirmationForm, setShowConfirmationForm] = useState(false);
   const [extractedEventData, setExtractedEventData] = useState(null);
   const [savedSkus, setSavedSkus] = useState(() => new Set());
-  const [savedItems, setSavedItems] = useState([]);
+  const seededCloset = useRef([
+    {
+      sku: 'CLOC001',
+      name: 'ALDO Hackathon Hoodie',
+      colors: 'charcoal',
+      price: 0,
+      category: 'topwear',
+      image: '/closet/Capture d’écran 2025-11-07 à 08.33.08.png'
+    },
+    {
+      sku: 'CLOC002',
+      name: 'Retail GenAI Tee',
+      colors: 'black',
+      price: 0,
+      category: 'topwear',
+      image: '/closet/Capture d’écran 2025-11-07 à 11.06.15.png'
+    },
+    {
+      sku: 'CLOC003',
+      name: 'Comfort Knit Sweater',
+      colors: 'cream',
+      price: 0,
+      category: 'topwear',
+      image: '/closet/Capture d’écran 2025-11-07 à 11.21.51.png'
+    },
+    {
+      sku: 'CLOC004',
+      name: 'Everyday Tote Bag',
+      colors: 'camel',
+      price: 0,
+      category: 'accessories',
+      image: '/closet/Capture d’écran 2025-11-07 à 11.21.59.png'
+    },
+    {
+      sku: 'CLOC005',
+      name: 'Minimalist Trainers',
+      colors: 'white',
+      price: 0,
+      category: 'footwear',
+      image: '/closet/Capture d’écran 2025-11-07 à 11.32.40.png'
+    },
+    {
+      sku: 'CLOC006',
+      name: 'Canvas Duffel Bag',
+      colors: 'tan',
+      price: 0,
+      category: 'accessories',
+      image: '/closet/Capture d’écran 2025-11-07 à 11.33.18.png'
+    }
+  ]);
+  const [savedItems, setSavedItems] = useState(seededCloset.current);
   const [showClosetInventory, setShowClosetInventory] = useState(false);
   const [showPackingList, setShowPackingList] = useState(false);
   const closetRef = useRef(null);
@@ -254,7 +304,6 @@ const CombinedWorkshopPage = () => {
         <EventConfirmationForm
           eventData={extractedEventData}
           onConfirm={handleConfirmEventDetails}
-          onCancel={handleCancelConfirmation}
           loading={processingTrip}
         />
       );
@@ -312,20 +361,14 @@ const CombinedWorkshopPage = () => {
           <span className="brand-subline">OUTFIT LAB</span>
         </div>
         <div className="profile-widget">
-          <div className="profile-avatar">JO</div>
+          <div className="profile-avatar">IT</div>
           <div className="profile-info">
-            <span className="profile-name">Jack Olsen</span>
-          </div>
-          <div className="profile-integrations">
-            <span className="integrations-label">Integrations</span>
-            <div className="integration-placeholder">
-              <span>Brand images coming soon</span>
-            </div>
+            <span className="profile-name">Ines Taleb ♀</span>
           </div>
         </div>
       </header>
       <div className="unified-columns">
-        <section className="unified-column left-column">
+        <section className="unified-column left-column step-widget">
           <div className="column-header">
             <div>
               <p className="eyebrow-text">Step 1</p>
@@ -351,7 +394,7 @@ const CombinedWorkshopPage = () => {
           </div>
         </section>
 
-        <section className="unified-column middle-column">
+        <section className="unified-column middle-column step-widget">
           <div className="column-header">
             <div>
               <p className="eyebrow-text">Step 2</p>
@@ -392,7 +435,7 @@ const CombinedWorkshopPage = () => {
           </div>
         </section>
 
-        <section className="unified-column right-column">
+        <section className="unified-column right-column step-widget">
           <div className="column-header">
             <div>
               <p className="eyebrow-text">Step 3</p>
@@ -416,7 +459,7 @@ const CombinedWorkshopPage = () => {
                       <div key={item.sku} className="closet-item-card">
                         <div className="closet-item-image">
                           <img
-                            src={getSkuImagePath(item.sku)}
+                            src={item.image || getSkuImagePath(item.sku)}
                             alt={item.name}
                             onError={(e) => {
                               e.target.style.display = 'none';
@@ -428,6 +471,7 @@ const CombinedWorkshopPage = () => {
                         <div className="closet-item-meta">
                           <strong>{item.name}</strong>
                           {item.colors && <span>{item.colors}</span>}
+                          {item.category && <span className="closet-tag">{item.category}</span>}
                         </div>
                       </div>
                     ))}

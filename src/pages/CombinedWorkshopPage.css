@@ -8,6 +8,8 @@
   --aldo-accent-strong: #e7b7b4;
   --aldo-secondary: #d7e4dc;
   --aldo-outline: #e5ddd3;
+  --aldo-neo-shadow: rgba(30, 30, 30, 0.18);
+  --aldo-neo-highlight: rgba(255, 255, 255, 0.85);
 }
 
 
@@ -191,9 +193,29 @@
   overflow-y: auto;
 }
 
-.middle-column {
+.step-widget {
+  position: relative;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    18px 18px 40px var(--aldo-neo-shadow),
+    -18px -18px 40px var(--aldo-neo-highlight),
+    inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.6),
+    inset -0.5px -0.5px 1px rgba(30, 30, 30, 0.08);
+  background-clip: padding-box;
+}
+
+.step-widget .column-header,
+.step-widget .input-panel,
+.step-widget .middle-content,
+.step-widget .closet-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.middle-column.step-widget {
   max-height: none;
-  overflow: visible;
+  overflow-y: auto;
 }
 
 .left-column {
@@ -218,7 +240,22 @@
   z-index: 1;
 }
 
-.middle-column,
+.middle-column {
+  background: linear-gradient(180deg, #f2f7f5 0%, #e8f0ed 100%);
+  color: var(--aldo-text);
+  position: relative;
+  overflow: visible;
+}
+
+.middle-column::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  pointer-events: none;
+}
+
 .right-column {
   background: var(--aldo-surface);
 }
@@ -292,6 +329,7 @@
   min-height: 0;
   position: relative;
   height: 100%;
+  overflow: visible;
 }
 
 
@@ -504,6 +542,15 @@
   color: var(--aldo-muted);
 }
 
+.closet-tag {
+  font-size: 0.75rem;
+  color: #fff;
+  background: var(--aldo-text);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-top: 4px;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -528,6 +575,7 @@
     justify-content: space-between;
   }
 }
+
 .packing-list {
   flex: 1;
   display: flex;
@@ -567,6 +615,19 @@
   gap: 16px;
   overflow-y: auto;
   padding-right: 4px;
+  position: relative;
+}
+
+.packing-grid::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 70%);
+  pointer-events: none;
+  border-radius: 0 0 20px 20px;
 }
 
 .packing-card {

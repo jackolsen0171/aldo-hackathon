@@ -4,7 +4,6 @@ import './EventConfirmationForm.css';
 const EventConfirmationForm = ({
     eventData,
     onConfirm,
-    onCancel,
     loading = false
 }) => {
     const initializeDailyPlans = (duration, existingPlans = []) => {
@@ -78,9 +77,6 @@ const EventConfirmationForm = ({
     return (
         <div className="event-confirmation-form">
             <div className="confirmation-header">
-                <div className="cher-avatar">
-                    <div className="cher-avatar-placeholder">👩‍🦱</div>
-                </div>
                 <div className="confirmation-title">
                     <h2>Let me confirm your event details</h2>
                     <p>Please review and adjust the details I extracted from your description:</p>
@@ -90,116 +86,112 @@ const EventConfirmationForm = ({
             <form onSubmit={handleSubmit} className="confirmation-form">
                 <div className="confirmation-sections">
                     <div className="basic-details-panel">
-                <div className="form-grid">
-                    {/* Occasion */}
-                    <div className="form-group">
-                        <label htmlFor="occasion">Event/Occasion *</label>
-                        <input
-                            id="occasion"
-                            type="text"
-                            value={formData.occasion}
-                            onChange={(e) => handleInputChange('occasion', e.target.value)}
-                            placeholder="e.g., Business conference, Wedding, Festival"
-                            required
-                        />
-                    </div>
+                        <div className="form-grid">
+                            {/* Occasion */}
+                            <div className="form-group">
+                                <label htmlFor="occasion">Event/Occasion *</label>
+                                <input
+                                    id="occasion"
+                                    type="text"
+                                    value={formData.occasion}
+                                    onChange={(e) => handleInputChange('occasion', e.target.value)}
+                                    placeholder="e.g., Business conference, Wedding, Festival"
+                                    required
+                                    className={!formData.occasion ? 'field-missing' : ''}
+                                />
+                            </div>
 
-                    {/* Location */}
-                    <div className="form-group">
-                        <label htmlFor="location">Location</label>
-                        <input
-                            id="location"
-                            type="text"
-                            value={formData.location}
-                            onChange={(e) => handleInputChange('location', e.target.value)}
-                            placeholder="e.g., New York, London, Chicago"
-                        />
-                    </div>
+                            {/* Location */}
+                            <div className="form-group">
+                                <label htmlFor="location">Location</label>
+                                <input
+                                    id="location"
+                                    type="text"
+                                    value={formData.location}
+                                    onChange={(e) => handleInputChange('location', e.target.value)}
+                                    placeholder="e.g., New York, London, Chicago"
+                                />
+                            </div>
 
-                    {/* Start Date */}
-                    <div className="form-group">
-                        <label htmlFor="startDate">Start Date</label>
-                        <input
-                            id="startDate"
-                            type="date"
-                            value={formData.startDate}
-                            onChange={(e) => handleInputChange('startDate', e.target.value)}
-                        />
-                    </div>
+                            {/* Start Date */}
+                            <div className="form-group">
+                                <label htmlFor="startDate">Start Date</label>
+                                <input
+                                    id="startDate"
+                                    type="date"
+                                    value={formData.startDate}
+                                    onChange={(e) => handleInputChange('startDate', e.target.value)}
+                                    className={!formData.startDate ? 'field-missing' : ''}
+                                />
+                            </div>
 
-                    {/* Duration */}
-                    <div className="form-group">
-                        <label htmlFor="duration">Duration (days) *</label>
-                        <input
-                            id="duration"
-                            type="number"
-                            min="1"
-                            max="14"
-                            value={formData.duration}
-                            onChange={(e) => handleDurationChange(e.target.value)}
-                            required
-                        />
-                    </div>
+                            {/* Duration */}
+                            <div className="form-group">
+                                <label htmlFor="duration">Duration (days) *</label>
+                                <input
+                                    id="duration"
+                                    type="number"
+                                    min="1"
+                                    max="14"
+                                    value={formData.duration}
+                                    onChange={(e) => handleDurationChange(e.target.value)}
+                                    required
+                                    className={!formData.duration || formData.duration < 1 ? 'field-missing' : ''}
+                                />
+                            </div>
 
-                    {/* Budget */}
-                    <div className="form-group">
-                        <label htmlFor="budget">Budget (optional)</label>
-                        <input
-                            id="budget"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={formData.budget}
-                            onChange={(e) => handleInputChange('budget', e.target.value)}
-                            placeholder="e.g., 500"
-                        />
-                    </div>
-                </div>
+                            {/* Budget */}
+                            <div className="form-group">
+                                <label htmlFor="budget">Budget (optional)</label>
+                                <input
+                                    id="budget"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={formData.budget}
+                                    onChange={(e) => handleInputChange('budget', e.target.value)}
+                                    placeholder="e.g., 500"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="daily-plans-panel">
-                    <div className="daily-plans-header">
-                        <h3>Daily Plan</h3>
-                        <p>Set the activity and dress code for each day.</p>
-                    </div>
-                    <div className="daily-plans-list">
-                        {formData.dailyPlans.map((plan, index) => (
-                            <div key={plan.day} className="daily-plan-row">
-                                <div className="day-label">
-                                    <span>Day {plan.day}</span>
+                        <div className="daily-plans-header">
+                            <h3>Daily Plan</h3>
+                            <p>Set the activity and dress code for each day.</p>
+                        </div>
+                        <div className="daily-plans-list">
+                            {formData.dailyPlans.map((plan, index) => (
+                                <div key={plan.day} className="daily-plan-row">
+                                    <div className="day-label">
+                                        <span>Day {plan.day}</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={plan.activity}
+                                        onChange={(e) => handleDayPlanChange(index, 'activity', e.target.value)}
+                                        placeholder="Activity or context (e.g., Client meetings, hiking)"
+                                        className={!plan.activity ? 'field-missing' : ''}
+                                    />
+                                    <select
+                                        value={plan.dressCode}
+                                        onChange={(e) => handleDayPlanChange(index, 'dressCode', e.target.value)}
+                                    >
+                                        {dressCodeOptions.map(option => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
-                                <input
-                                    type="text"
-                                    value={plan.activity}
-                                    onChange={(e) => handleDayPlanChange(index, 'activity', e.target.value)}
-                                    placeholder="Activity or context (e.g., Client meetings, hiking)"
-                                />
-                                <select
-                                    value={plan.dressCode}
-                                    onChange={(e) => handleDayPlanChange(index, 'dressCode', e.target.value)}
-                                >
-                                    {dressCodeOptions.map(option => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="form-actions">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="cancel-button"
-                        disabled={loading}
-                    >
-                        Back to Edit
-                    </button>
                     <button
                         type="submit"
                         className="confirm-button"
@@ -216,14 +208,6 @@ const EventConfirmationForm = ({
                     </button>
                 </div>
             </form>
-                {eventData?.needsClarification && eventData.needsClarification.length > 0 && (
-                    <div className="clarifications-inline">
-                        <span>Missing:</span>
-                        {eventData.needsClarification.map((item, index) => (
-                            <strong key={index}>{item}</strong>
-                        ))}
-                    </div>
-                )}
         </div>
     );
 };

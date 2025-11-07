@@ -134,7 +134,7 @@ const OutfitCardCarousel = ({
             <div className="carousel-card">
                 <details className="category-details" open>
                     <summary>Clothing</summary>
-                <div className="carousel-items">
+                    <div className="carousel-items scrollable-grid">
                     {ORDERED_MAIN_CATEGORIES.map(category => {
                         const item = outfitItems[category];
                         if (!item) return null;
@@ -151,13 +151,13 @@ const OutfitCardCarousel = ({
                             />
                         );
                     })}
-                </div>
+                    </div>
                 </details>
 
                 {accessories.length > 0 && (
                     <details className="accessories-block" open>
                         <summary className="chip-label">Accessories</summary>
-                        <div className="accessories-grid">
+                        <div className="accessories-grid scrollable-grid">
                             {accessories.map((accessory, idx) => (
                                 <div key={`${accessory.sku || idx}`} className="accessory-card">
                                     <div className="accessory-image">
