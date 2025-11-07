@@ -1,0 +1,233 @@
+.outfit-carousel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    height: 100%;
+    color: var(--aldo-text);
+}
+
+.carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.carousel-header h3 {
+    margin: 4px 0 0;
+    font-size: 1.4rem;
+    color: var(--aldo-text);
+}
+
+.carousel-header .eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(30, 30, 30, 0.45);
+    margin: 0;
+}
+
+.header-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--aldo-muted);
+    font-size: 0.9rem;
+}
+
+.header-meta .divider {
+    opacity: 0.4;
+}
+
+.carousel-card {
+    flex: 1;
+    background: var(--aldo-surface);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 25px 50px var(--aldo-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.carousel-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.outfit-flip-card {
+    perspective: 1200px;
+}
+
+.flip-inner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+    border-radius: 18px;
+    outline: none;
+}
+
+.flip-inner:focus-visible {
+    box-shadow: 0 0 0 3px var(--aldo-accent-strong);
+}
+
+.outfit-flip-card:hover .flip-inner,
+.outfit-flip-card:focus-within .flip-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-face {
+    position: absolute;
+    inset: 0;
+    background: var(--aldo-secondary);
+    border-radius: 18px;
+    padding: 14px;
+    box-sizing: border-box;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.flip-face-front {
+    background: var(--aldo-secondary);
+}
+
+.flip-face-back {
+    background: var(--aldo-accent);
+    transform: rotateY(180deg);
+    justify-content: center;
+}
+
+.flip-face-back h5 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--aldo-text);
+}
+
+.flip-face-back p {
+    margin: 0;
+    color: var(--aldo-text);
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.image-frame {
+    flex: 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.image-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--aldo-muted);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: #f0f0f0;
+}
+
+.chip-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(30, 30, 30, 0.5);
+}
+
+.item-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.chip-value {
+    font-size: 1rem;
+    color: var(--aldo-text);
+}
+
+.chip-meta {
+    font-size: 0.85rem;
+    color: var(--aldo-muted);
+}
+
+.accessories-block {
+    background: var(--aldo-accent);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.accessories-block ul {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    color: var(--aldo-text);
+    line-height: 1.5;
+}
+
+.rationale {
+    background: #f4efe8;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.rationale h4 {
+    margin: 0 0 8px;
+    color: var(--aldo-text);
+}
+
+.rationale p {
+    margin: 0;
+    color: var(--aldo-muted);
+    line-height: 1.4;
+}
+
+.carousel-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.control-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    border: none;
+    background: var(--aldo-text);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+    background: #2f2f2f;
+}
+
+.outfit-carousel-empty {
+    flex: 1;
+    border-radius: 16px;
+    background: var(--aldo-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--aldo-muted);
+}

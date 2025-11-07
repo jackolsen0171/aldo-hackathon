@@ -115,6 +115,146 @@
     font-size: 1rem;
 }
 
+/* Simplified presentation */
+.daily-outfit-card.simplified {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+    margin-bottom: 24px;
+}
+
+.hover-hint {
+    font-size: 0.9rem;
+    color: #546172;
+    margin: 8px 0 18px;
+}
+
+.simplified-outfit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 18px;
+}
+
+.hover-item-card {
+    background: #f7f9fc;
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.hover-item-card:hover {
+    border-color: #c7d7ff;
+    transform: translateY(-4px);
+}
+
+.hover-item-card.reused {
+    border-color: #ffe082;
+}
+
+.hover-item-visual {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hover-item-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hover-item-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #99a2b3;
+}
+
+.hover-item-reuse {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 193, 7, 0.9);
+    color: #2f1f00;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.hover-rationale {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.92);
+    color: #e2e8f0;
+    opacity: 0;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    text-align: left;
+    transition: opacity 0.2s ease;
+}
+
+.hover-item-visual:hover .hover-rationale {
+    opacity: 1;
+}
+
+.hover-rationale h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #a5b4fc;
+}
+
+.hover-rationale p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.hover-item-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hover-item-category {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: #7b8799;
+}
+
+.hover-item-name {
+    font-weight: 600;
+    color: #1d2433;
+    font-size: 0.95rem;
+}
+
+.empty-outfit-state {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    color: #94a3b8;
+    grid-column: 1 / -1;
+}
+
 /* Header */
 .outfit-display-header {
     margin-bottom: 30px;

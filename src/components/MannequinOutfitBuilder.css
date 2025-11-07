@@ -6,6 +6,10 @@
   height: 100%;
 }
 
+.mannequin-builder--condensed {
+  padding: 20px;
+}
+
 .builder-content {
   display: grid;
   grid-template-columns: 2fr 1.5fr;
@@ -16,6 +20,13 @@
   padding: 10px;
 }
 
+.builder-content--single-column {
+  grid-template-columns: 1fr;
+  height: auto;
+  max-width: 1000px;
+  width: 100%;
+}
+
 /* New outfit display container styles */
 .outfit-display-container {
   background: white;
@@ -23,6 +34,12 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   overflow: auto;
   height: 100%;
+}
+
+.outfit-display-container--full {
+  width: 100%;
+  height: auto;
+  min-height: 500px;
 }
 
 .no-outfit-placeholder {

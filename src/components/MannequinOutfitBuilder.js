@@ -75,11 +75,15 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
     }
   };
 
+  const builderClasses = `builder-content ${hasGeneratedOutfit ? 'builder-content--single-column' : ''}`;
+  const displayContainerClasses = `outfit-display-container ${hasGeneratedOutfit ? 'outfit-display-container--full' : ''}`;
+  const wrapperClasses = `mannequin-builder ${hasGeneratedOutfit ? 'mannequin-builder--condensed' : ''}`;
+
   return (
-    <div className="mannequin-builder">
-      <div className="builder-content">
+    <div className={wrapperClasses}>
+      <div className={builderClasses}>
         {/* Main - Outfit Display */}
-        <div className="outfit-display-container">
+        <div className={displayContainerClasses}>
           {hasGeneratedOutfit ? (
             <OutfitDisplay
               outfits={getOutfitDisplayData()}
@@ -108,23 +112,23 @@ const MannequinOutfitBuilder = ({ selectedTrip, selectedOutfit }) => {
         </div>
 
         {/* Right Side - Summary and Chat Panel */}
-        <div className="chat-panel">
-          {/* Outfit Summary Panel */}
-          {hasGeneratedOutfit && (
+        {!hasGeneratedOutfit && (
+          <div className="chat-panel">
+            {/* Outfit Summary Panel */}
             <OutfitSummaryPanel
               tripDetails={getTripDetails()}
               reusabilityAnalysis={getReusabilityAnalysis()}
               outfits={getOutfitDisplayData()}
             />
-          )}
 
-          {/* Cher Chat Panel */}
-          <CherChatPanel
-            selectedTrip={selectedTrip}
-            selectedOutfit={selectedOutfit}
-            currentOutfit={currentOutfit}
-          />
-        </div>
+            {/* Cher Chat Panel */}
+            <CherChatPanel
+              selectedTrip={selectedTrip}
+              selectedOutfit={selectedOutfit}
+              currentOutfit={currentOutfit}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
