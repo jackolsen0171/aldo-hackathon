@@ -5,6 +5,8 @@
  */
 
 import contextAccumulator from './contextAccumulator';
+import clothingDatasetService from './clothingDatasetService';
+import bedrockService from './bedrockService';
 import csvLoader from './CSVLoader';
 
 class OutfitGenerationService {
@@ -20,37 +22,39 @@ class OutfitGenerationService {
      */
     async generateOutfits(sessionId, confirmedDetails) {
         try {
-            // Validate inputs
             this.validateInputs(sessionId, confirmedDetails);
 
-            // Load clothing dataset
-            const csvData = await this.loadClothingDataset();
+            const dataset = await clothingDatasetService.getDataset();
 
-            // Get accumulated context
             const contextFile = contextAccumulator.getContextFile(sessionId);
             if (!contextFile) {
                 throw new Error('Context file not found for session');
             }
 
-            // Generate context summary for AI
             const contextSummary = contextAccumulator.generateContextSummary(sessionId);
 
-            // Get formatted context for AI consumption
-            const formattedContext = contextAccumulator.formatContextForAI(sessionId);
+            const aiResult = await bedrockService.generateOutfitRecommendations({
+                eventDetails: confirmedDetails,
+                csvContent: dataset.csvContent,
+                contextSummary
+            });
 
-            // Build AI prompt with context and CSV data
-            const prompt = this.buildAIPrompt(contextSummary, csvData, confirmedDetails.duration, formattedContext);
+            if (!aiResult.success) {
+                throw new Error(aiResult.error?.message || 'AI outfit generation failed');
+            }
 
-            // Return structured data for AI processing
+            const hydratedOutfits = this.hydrateOutfits(aiResult.data, dataset.skuMap, sessionId);
+            const reusabilityAnalysis = aiResult.data.reusabilityAnalysis ||
+                this.calculateReusabilityMetrics(hydratedOutfits);
+
             return {
                 success: true,
                 data: {
-                    sessionId,
+                    outfits: hydratedOutfits,
+                    reusabilityAnalysis,
                     contextSummary,
-                    csvData,
-                    prompt,
-                    confirmedDetails,
-                    timestamp: new Date().toISOString()
+                    rawAiData: aiResult.data,
+                    generatedAt: new Date().toISOString()
                 }
             };
 
@@ -66,75 +70,102 @@ class OutfitGenerationService {
         }
     }
 
-    /**
-     * Load clothing dataset from CSV file
-     * @returns {Promise<string>} Raw CSV content
-     */
-    async loadClothingDataset() {
-        try {
-            // Use CSVLoader utility to load the clothing dataset
-            const csvContent = await csvLoader.loadCSV('/clothing_dataset.csv');
-            return csvContent;
+    hydrateOutfits(aiData, skuMap, sessionId) {
+        const outfits = {};
+        const timestamp = new Date().toISOString();
 
-        } catch (error) {
-            console.error('CSV loading error:', error);
-            throw new Error(`Failed to load clothing dataset: ${error.message}`);
-        }
+        aiData.dailyOutfits.forEach(dayOutfit => {
+            const { day } = dayOutfit;
+            const hydratedItems = {
+                topwear: this.hydrateSlot('topwear', dayOutfit.outfit.topwear, skuMap),
+                bottomwear: this.hydrateSlot('bottomwear', dayOutfit.outfit.bottomwear, skuMap),
+                footwear: this.hydrateSlot('footwear', dayOutfit.outfit.footwear, skuMap),
+                outerwear: this.hydrateSlot('outerwear', dayOutfit.outfit.outerwear, skuMap),
+                accessories: (dayOutfit.outfit.accessories || [])
+                    .map(accessory => this.hydrateSlot('accessories', accessory, skuMap))
+                    .filter(Boolean)
+            };
+
+            outfits[day] = {
+                id: `outfit-${sessionId}-${day}`,
+                name: `Day ${day} Outfit`,
+                day,
+                tripId: sessionId,
+                occasion: dayOutfit.occasion || `Day ${day}`,
+                items: hydratedItems,
+                styling: dayOutfit.styling,
+                isSaved: true,
+                createdAt: timestamp,
+                updatedAt: timestamp
+            };
+        });
+
+        return outfits;
     }
 
-    /**
-     * Build AI prompt with context and CSV data
-     * @param {Object} contextSummary - Accumulated context summary
-     * @param {string} csvData - Raw CSV clothing data
-     * @param {number} duration - Trip duration in days
-     * @param {string} formattedContext - Formatted context string for AI
-     * @returns {string} Formatted AI prompt
-     */
-    buildAIPrompt(contextSummary, csvData, duration, formattedContext) {
-        let prompt = "OUTFIT GENERATION REQUEST\n\n";
-
-        // Add formatted context from context accumulator
-        if (formattedContext) {
-            prompt += formattedContext + "\n";
-        } else {
-            // Fallback to basic context information
-            prompt += "CONTEXT:\n";
-            prompt += `Event: ${contextSummary.event.occasion || 'Not specified'}\n`;
-            prompt += `Duration: ${duration} day(s)\n`;
-            prompt += `Location: ${contextSummary.event.location || 'Not specified'}\n`;
-            prompt += `Dress Code: ${contextSummary.style.dressCode || 'Not specified'}\n`;
-
-            if (contextSummary.style.budget) {
-                prompt += `Budget: $${contextSummary.style.budget}\n`;
-            }
-
-            if (contextSummary.environment.weather) {
-                prompt += `Weather: ${JSON.stringify(contextSummary.environment.weather)}\n`;
-            }
-
-            prompt += "\n";
+    hydrateSlot(slotName, slotData, skuMap) {
+        if (!slotData || slotData === null) {
+            return null;
         }
 
-        // Add reusability requirements
-        prompt += "REQUIREMENTS:\n";
-        prompt += "- Generate complete outfits for each day\n";
-        prompt += "- Prioritize practical, versatile items\n";
-        if (duration > 3) {
-            prompt += "- Ensure at least 60% of items are reused across multiple days\n";
+        if (!slotData.sku) {
+            throw new Error(`AI response missing SKU for ${slotName}`);
         }
-        prompt += "- Consider weather appropriateness and dress code compliance\n";
-        prompt += "- Provide styling rationale for each outfit\n\n";
 
-        // Add CSV data
-        prompt += "AVAILABLE CLOTHING ITEMS:\n";
-        prompt += csvData;
-        prompt += "\n";
+        const sku = slotData.sku.trim();
+        const catalogItem = skuMap.get(sku);
 
-        // Add response format instructions
-        prompt += "RESPONSE FORMAT:\n";
-        prompt += "Please respond with a JSON object containing daily outfits and reusability analysis.\n";
+        if (!catalogItem) {
+            throw new Error(`AI referenced unknown SKU "${sku}" for ${slotName}`);
+        }
 
-        return prompt;
+        return {
+            ...catalogItem
+        };
+    }
+
+    calculateReusabilityMetrics(outfits) {
+        const usageMap = new Map();
+
+        Object.values(outfits).forEach(outfit => {
+            const { items, day } = outfit;
+            ['topwear', 'bottomwear', 'footwear', 'outerwear'].forEach(slot => {
+                const item = items[slot];
+                if (item) {
+                    if (!usageMap.has(item.sku)) {
+                        usageMap.set(item.sku, []);
+                    }
+                    usageMap.get(item.sku).push(day);
+                }
+            });
+
+            (items.accessories || []).forEach(accessory => {
+                if (!usageMap.has(accessory.sku)) {
+                    usageMap.set(accessory.sku, []);
+                }
+                usageMap.get(accessory.sku).push(day);
+            });
+        });
+
+        const totalItems = usageMap.size;
+        const reusedItems = Array.from(usageMap.values()).filter(days => days.length > 1).length;
+        const reusabilityPercentage = totalItems > 0
+            ? Math.round((reusedItems / totalItems) * 100)
+            : 0;
+
+        const reusabilityMap = {};
+        usageMap.forEach((days, sku) => {
+            if (days.length > 1) {
+                reusabilityMap[sku] = [...new Set(days)].sort((a, b) => a - b);
+            }
+        });
+
+        return {
+            totalItems,
+            reusedItems,
+            reusabilityPercentage,
+            reusabilityMap
+        };
     }
 
     /**

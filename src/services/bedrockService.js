@@ -10,6 +10,7 @@ import {
     DRESS_CODE_RULES,
     DATE_PARSING_EXAMPLES
 } from '../schemas/eventExtractionSchema';
+import outfitRecommendationSchema from '../schemas/outfitRecommendationSchema';
 
 class BedrockService {
     constructor() {
@@ -486,12 +487,16 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
 
     /**
      * Generate outfit recommendations using CSV data and AI
+     * @param {Object} params
+     * @param {Object} params.eventDetails
+     * @param {string} params.csvContent
+     * @param {Object} params.contextSummary
      */
-    async generateOutfitRecommendations(eventDetails, csvData, contextSummary) {
+    async generateOutfitRecommendations({ eventDetails, csvContent, contextSummary }) {
         try {
             console.log('Generating outfit recommendations with Bedrock:', eventDetails);
 
-            const outfitPrompt = this.buildOutfitGenerationPrompt(eventDetails, csvData, contextSummary);
+            const outfitPrompt = this.buildOutfitGenerationPrompt(eventDetails, csvContent, contextSummary);
 
             const requestPayload = {
                 messages: [{
@@ -518,11 +523,12 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
             console.log('Raw outfit AI response:', aiResponse);
 
             // Parse the AI response into structured outfit data
-            const outfitData = this.parseOutfitResponse(aiResponse, eventDetails);
+            const outfitData = this.parseOutfitResponse(aiResponse);
 
             return {
                 success: true,
-                data: outfitData
+                data: outfitData,
+                rawResponse: aiResponse
             };
 
         } catch (error) {
@@ -540,101 +546,74 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
     /**
      * Build outfit generation prompt with CSV data
      */
-    buildOutfitGenerationPrompt(eventDetails, csvData, contextSummary) {
+    buildOutfitGenerationPrompt(eventDetails, csvContent, contextSummary) {
         const { occasion, duration, location, dressCode, budget } = eventDetails;
-
-        // Parse CSV to show available items by category
-        const csvLines = csvData.split('\n').filter(line => line.trim());
-        if (csvLines.length < 2) {
-            console.warn('Invalid CSV data provided');
-            return this.buildSimplePrompt(eventDetails);
-        }
-
-        const headers = csvLines[0].split(',').map(h => h.trim());
-        const items = csvLines.slice(1).map(line => {
-            const values = line.split(',');
-            const item = {};
-            headers.forEach((header, index) => {
-                item[header] = values[index]?.trim() || '';
-            });
-            return item;
-        }).filter(item => item.sku);
-
-        // Group items by category for easier selection
-        const itemsByCategory = {
-            topwear: items.filter(item => item.category === 'Topwear'),
-            bottomwear: items.filter(item => item.category === 'Bottomwear'),
-            footwear: items.filter(item => item.category === 'Footwear'),
-            outerwear: items.filter(item => item.category === 'Outerwear')
+        const promptContext = {
+            occasion,
+            duration,
+            location,
+            dressCode,
+            budget,
+            weather: contextSummary?.environment?.weather || null,
+            weatherConstraints: contextSummary?.weatherConstraints || null,
+            specialRequirements: contextSummary?.style?.specialRequirements || []
         };
 
-        // Filter by formality for dress code
-        const formalityFilter = this.getFormalityFilter(dressCode);
+        return `You are an expert travel stylist. Using the clothing catalog below, create ${duration} complete daily outfits for the described trip. You must select items ONLY by SKU from the CSV table—do not invent new products.
 
-        return `You are an expert fashion stylist. Create ${duration} complete outfit recommendations for a ${occasion} in ${location || 'unspecified location'} with ${dressCode} dress code.
+TRIP CONTEXT:
+${JSON.stringify(promptContext, null, 2)}
 
-DRESS CODE REQUIREMENTS:
-- ${dressCode}: Select items with formality levels: ${formalityFilter.join(', ')}
+AVAILABLE CLOTHING ITEMS (CSV):
+${csvContent}
 
-AVAILABLE ITEMS BY CATEGORY:
+OUTPUT REQUIREMENTS:
+1. Build ${duration} daily outfits with topwear, bottomwear, and footwear. Add outerwear/accessories only when they improve the outfit or meet weather requirements.
+2. Choose SKUs that match the dress code, weather, and special requirements. Reuse versatile items across days to keep packing lean.
+3. For each day, explain why the selected combination works (styling rationale), how it satisfies weather needs, and how it complies with the dress code.
+4. Respond with JSON ONLY in this structure (no markdown, no prose outside JSON):
 
-TOPWEAR OPTIONS:
-${itemsByCategory.topwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
-
-BOTTOMWEAR OPTIONS:
-${itemsByCategory.bottomwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
-
-FOOTWEAR OPTIONS:
-${itemsByCategory.footwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
-
-OUTERWEAR OPTIONS:
-${itemsByCategory.outerwear.map(item => `${item.sku}: ${item.name} (${item.formality}, ${item.colors}, $${item.price})`).join('\n')}
-
-SELECTION RULES:
-1. Choose items that match ${dressCode} formality level
-2. Ensure color coordination across the outfit
-3. Consider weather appropriateness
-4. Maximize reusability across ${duration} days
-5. Select ONLY from the SKUs listed above
-${budget ? `6. Stay within budget of ${budget}` : ''}
-
-CRITICAL: Respond with ONLY valid JSON in this exact format:
 {
   "tripDetails": {
     "occasion": "${occasion}",
     "duration": ${duration},
     "location": "${location || 'unspecified'}",
     "dressCode": "${dressCode}",
-    "budget": ${budget || 'null'}
+    "budget": ${budget ?? 'null'}
   },
-  "dailyOutfits": [${Array.from({ length: duration }, (_, i) => `
+  "dailyOutfits": [
     {
-      "day": ${i + 1},
-      "date": "Day ${i + 1}",
-      "occasion": "${occasion} - Day ${i + 1}",
+      "day": 1,
+      "date": "Day 1",
+      "occasion": "${occasion} - Day 1",
       "outfit": {
-        "topwear": {"sku": "SELECT_FROM_TOPWEAR_LIST", "name": "EXACT_NAME", "category": "Topwear", "price": NUMBER, "colors": "EXACT_COLORS", "weatherSuitability": "EXACT_WEATHER", "formality": "EXACT_FORMALITY", "notes": "EXACT_NOTES"},
-        "bottomwear": {"sku": "SELECT_FROM_BOTTOMWEAR_LIST", "name": "EXACT_NAME", "category": "Bottomwear", "price": NUMBER, "colors": "EXACT_COLORS", "weatherSuitability": "EXACT_WEATHER", "formality": "EXACT_FORMALITY", "notes": "EXACT_NOTES"},
-        "footwear": {"sku": "SELECT_FROM_FOOTWEAR_LIST", "name": "EXACT_NAME", "category": "Footwear", "price": NUMBER, "colors": "EXACT_COLORS", "weatherSuitability": "EXACT_WEATHER", "formality": "EXACT_FORMALITY", "notes": "EXACT_NOTES"},
-        "outerwear": null,
-        "accessories": []
+        "topwear": { "sku": "SKU###" },
+        "bottomwear": { "sku": "SKU###" },
+        "footwear": { "sku": "SKU###" },
+        "outerwear": { "sku": "SKU###" } | null,
+        "accessories": [{ "sku": "SKU###" }, ...]
       },
       "styling": {
-        "rationale": "Explain why these items work together",
-        "weatherConsiderations": "Weather appropriateness explanation", 
-        "dresscodeCompliance": "How this meets ${dressCode} requirements"
+        "rationale": "Why each item works together, referencing SKUs",
+        "weatherConsiderations": "How the look handles the forecast",
+        "dresscodeCompliance": "Why it matches ${dressCode}"
       }
-    }`).join(',')}
+    }
   ],
   "reusabilityAnalysis": {
-    "totalItems": 0,
-    "reusedItems": 0,
-    "reusabilityPercentage": 0,
-    "reusabilityMap": {}
+    "totalItems": number,
+    "reusedItems": number,
+    "reusabilityPercentage": number,
+    "reusabilityMap": {
+      "SKU###": [1,3]
+    }
   }
 }
 
-Replace SELECT_FROM_X_LIST with actual SKUs from the lists above. Copy all item details exactly as shown.`;
+IMPORTANT:
+- Do NOT add commentary outside the JSON object.
+- Every SKU must exist in the CSV table above.
+- You may include optional descriptive fields (name, colors, etc.) inside each outfit slot, but the SKU is mandatory.`;
     }
 
     /**
@@ -662,154 +641,32 @@ Replace SELECT_FROM_X_LIST with actual SKUs from the lists above. Copy all item 
         Respond with valid JSON containing tripDetails and dailyOutfits array with outfit objects containing topwear, bottomwear, footwear, and styling information.`;
     }
 
-    /**
-     * Build outfit generation prompt with CSV data
-     */
-    buildOutfitGenerationPrompt(eventDetails, csvData, contextSummary) {
-        const { occasion, duration, location, dressCode, budget } = eventDetails;
-
-        return `You are an expert fashion stylist. Create ${duration} complete outfit recommendations for a ${occasion} in ${location || 'unspecified location'} with ${dressCode} dress code.
-
-AVAILABLE CLOTHING ITEMS (CSV format):
-${csvData}
-
-REQUIREMENTS:
-- Create ${duration} complete daily outfits
-- Each outfit must include: topwear, bottomwear, footwear
-- Add outerwear if weather requires it
-- Select items ONLY from the CSV data above
-- Match SKUs exactly from the CSV
-- Prioritize items suitable for ${dressCode} formality level
-- Consider weather appropriateness
-- Maximize item reusability across days (aim for 60%+ reuse for trips >3 days)
-${budget ? `- Stay within budget of $${budget}` : ''}
-
-RESPONSE FORMAT:
-Respond with ONLY a valid JSON object in this exact structure:
-
-{
-  "tripDetails": {
-    "occasion": "${occasion}",
-    "duration": ${duration},
-    "location": "${location || 'unspecified'}",
-    "dressCode": "${dressCode}",
-    "budget": ${budget || 'null'}
-  },
-  "dailyOutfits": [
-    {
-      "day": 1,
-      "date": "Day 1",
-      "occasion": "${occasion} - Day 1",
-      "outfit": {
-        "topwear": {
-          "sku": "exact SKU from CSV",
-          "name": "exact name from CSV",
-          "category": "from CSV",
-          "price": "from CSV as number",
-          "colors": "from CSV",
-          "weatherSuitability": "from CSV",
-          "formality": "from CSV",
-          "notes": "from CSV"
-        },
-        "bottomwear": {
-          "sku": "exact SKU from CSV",
-          "name": "exact name from CSV",
-          "category": "from CSV", 
-          "price": "from CSV as number",
-          "colors": "from CSV",
-          "weatherSuitability": "from CSV",
-          "formality": "from CSV",
-          "notes": "from CSV"
-        },
-        "footwear": {
-          "sku": "exact SKU from CSV",
-          "name": "exact name from CSV",
-          "category": "from CSV",
-          "price": "from CSV as number", 
-          "colors": "from CSV",
-          "weatherSuitability": "from CSV",
-          "formality": "from CSV",
-          "notes": "from CSV"
-        },
-        "outerwear": null,
-        "accessories": []
-      },
-      "styling": {
-        "rationale": "Why these items work together for ${dressCode} ${occasion}",
-        "weatherConsiderations": "How this outfit addresses weather conditions",
-        "dresscodeCompliance": "How this meets ${dressCode} requirements"
-      }
-    }
-  ],
-  "reusabilityAnalysis": {
-    "totalItems": 0,
-    "reusedItems": 0, 
-    "reusabilityPercentage": 0,
-    "reusabilityMap": {
-      "item-sku": [1, 2, 3]
-    }
-  }
-}
-
-Create ${duration} daily outfits following this structure. Ensure all SKUs match exactly with the CSV data.`;
-    }
 
     /**
      * Parse AI outfit response into structured data
      */
-    parseOutfitResponse(aiResponse, eventDetails) {
+    parseOutfitResponse(aiResponse) {
+        console.log('Parsing AI response for outfit data...');
+        const cleanedResponse = this.cleanJsonResponse(aiResponse);
+
+        let parsed;
         try {
-            console.log('Parsing AI response for outfit data...');
-
-            // Clean the response
-            const cleanedResponse = this.cleanJsonResponse(aiResponse);
-            console.log('Cleaned response:', cleanedResponse.substring(0, 500) + '...');
-
-            const outfitData = JSON.parse(cleanedResponse);
-            console.log('Parsed outfit data structure:', Object.keys(outfitData));
-
-            // Validate and enhance the response
-            if (!outfitData.dailyOutfits || !Array.isArray(outfitData.dailyOutfits)) {
-                console.warn('Invalid outfit data structure, using fallback');
-                throw new Error('Invalid outfit data structure');
-            }
-
-            // Validate each daily outfit
-            outfitData.dailyOutfits.forEach((dayOutfit, index) => {
-                if (!dayOutfit.outfit) {
-                    console.warn(`Day ${index + 1} missing outfit data`);
-                    throw new Error(`Day ${index + 1} missing outfit data`);
-                }
-
-                // Ensure required components exist
-                const requiredComponents = ['topwear', 'bottomwear', 'footwear'];
-                for (const component of requiredComponents) {
-                    if (!dayOutfit.outfit[component]) {
-                        console.warn(`Day ${index + 1} missing ${component}`);
-                        throw new Error(`Day ${index + 1} missing ${component}`);
-                    }
-                }
-            });
-
-            // Calculate reusability analysis
-            const reusabilityAnalysis = this.calculateReusabilityAnalysis(outfitData.dailyOutfits);
-            outfitData.reusabilityAnalysis = reusabilityAnalysis;
-
-            // Add metadata
-            outfitData.tripId = `trip-${Date.now()}`;
-            outfitData.sessionId = `session-${Date.now()}`;
-            outfitData.generatedAt = new Date().toISOString();
-
-            console.log('✅ Successfully parsed AI outfit response');
-            return outfitData;
-
+            parsed = JSON.parse(cleanedResponse);
         } catch (error) {
-            console.error('❌ Failed to parse outfit response:', error.message);
-            console.log('Falling back to context-aware outfit generation...');
-
-            // Return fallback outfit data that uses actual context
-            return this.createFallbackOutfitData(eventDetails);
+            console.error('Failed to parse AI JSON:', error);
+            throw new Error('AI returned invalid JSON for outfit recommendations');
         }
+
+        const validation = outfitRecommendationSchema.safeParse(parsed);
+
+        if (!validation.success) {
+            console.error('Outfit schema validation failed:', validation.error.issues);
+            const firstIssue = validation.error.issues?.[0];
+            throw new Error(firstIssue?.message || 'AI response failed validation');
+        }
+
+        console.log('✅ Successfully validated AI outfit response');
+        return validation.data;
     }
 
     /**

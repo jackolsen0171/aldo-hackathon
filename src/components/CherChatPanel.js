@@ -176,11 +176,11 @@ const CherChatPanel = ({ selectedTrip, selectedOutfit, currentItems }) => {
       const { default: bedrockService } = await import('../services/bedrockService');
 
       // Call AI to generate outfit recommendations using CSV data
-      const aiResult = await bedrockService.generateOutfitRecommendations(
-        confirmedEventData,
-        csvData,
+      const aiResult = await bedrockService.generateOutfitRecommendations({
+        eventDetails: confirmedEventData,
+        csvContent: csvData,
         contextSummary
-      );
+      });
 
       if (!aiResult.success) {
         throw new Error(aiResult.error?.message || 'Failed to generate AI outfit recommendations');

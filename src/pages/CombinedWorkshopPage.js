@@ -258,228 +258,57 @@ const CombinedWorkshopPage = ({ onNavigate }) => {
     }
   };
 
-  // Generate outfits using the actual outfit generation service
+  // Generate outfits using Bedrock via outfitGenerationService
   const generateOutfits = async (trip) => {
-    try {
-      console.log('Starting outfit generation for trip:', trip);
+    console.log('Starting outfit generation for trip:', trip?.id);
+    const { default: outfitGenerationService } = await import('../services/OutfitGenerationService');
+    const { default: contextAccumulator } = await import('../services/contextAccumulator');
 
-      // Import the outfit generation service
-      console.log('Importing services...');
-      const { default: outfitGenerationService } = await import('../services/OutfitGenerationService');
-      const { default: bedrockAgentService } = await import('../services/bedrockAgentService');
-      console.log('Services imported successfully');
+    contextAccumulator.initializeContextFile(trip.id, {
+      originalMessage: trip.description
+    });
 
-      // Initialize context accumulator with trip data
-      console.log('Initializing context accumulator...');
-      const { default: contextAccumulator } = await import('../services/contextAccumulator');
+    contextAccumulator.addConfirmedDetails(trip.id, {
+      occasion: trip.eventData?.occasion || trip.name || 'Trip',
+      location: trip.destination || trip.eventData?.location,
+      startDate: trip.startDate,
+      duration: trip.totalDays || 3,
+      dressCode: trip.eventData?.dressCode || 'smart-casual',
+      budget: trip.eventData?.budget || null,
+      specialRequirements: trip.eventData?.specialRequirements || []
+    });
 
-      // Initialize context file for this session
-      const contextFile = contextAccumulator.initializeContextFile(trip.id, {
-        originalMessage: trip.description
-      });
+    const generationResult = await outfitGenerationService.generateOutfits(trip.id, {
+      duration: trip.totalDays || 3,
+      occasion: trip.eventData?.occasion || trip.name || 'Trip',
+      location: trip.destination || trip.eventData?.location,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      dressCode: trip.eventData?.dressCode || 'smart-casual',
+      budget: trip.eventData?.budget || null
+    });
 
-      // Add confirmed event details to context
-      contextAccumulator.addConfirmedDetails(trip.id, {
-        occasion: trip.eventData?.occasion || trip.name || 'Trip',
-        location: trip.destination || trip.eventData?.location,
-        startDate: trip.startDate,
-        duration: trip.totalDays || 3,
-        dressCode: trip.eventData?.dressCode || 'smart-casual',
-        budget: trip.eventData?.budget || null,
-        specialRequirements: trip.eventData?.specialRequirements || []
-      });
-
-      // Generate outfits using the service
-      console.log('Calling outfitGenerationService.generateOutfits...');
-      const generationResult = await outfitGenerationService.generateOutfits(trip.id, {
-        duration: trip.totalDays || 3,
-        occasion: trip.eventData?.occasion || trip.name || 'Trip',
-        location: trip.destination || trip.eventData?.location,
-        startDate: trip.startDate,
-        endDate: trip.endDate
-      });
-
-      console.log('Generation result:', generationResult);
-
-      if (!generationResult.success) {
-        throw new Error(generationResult.error?.message || 'Failed to generate outfit context');
-      }
-
-      console.log('Outfit generation context prepared:', generationResult.data);
-
-      // Use Bedrock Agent to generate actual outfit recommendations
-      console.log('Calling bedrockAgentService.generateOutfitRecommendations...');
-      const aiResult = await bedrockAgentService.generateOutfitRecommendations(
-        generationResult.data.prompt,
-        trip.id
-      );
-
-      console.log('AI result received:', aiResult);
-
-      if (!aiResult.success) {
-        throw new Error(aiResult.error?.message || 'Failed to generate AI outfit recommendations');
-      }
-
-      console.log('AI outfit recommendations received:', aiResult.data);
-
-      // Parse the AI response into structured outfit data
-      const parsedResult = bedrockAgentService.parseOutfitResponse(aiResult.data.response);
-
-      if (!parsedResult.success) {
-        throw new Error(parsedResult.error?.message || 'Failed to parse outfit recommendations');
-      }
-
-      console.log('Parsed outfit data:', parsedResult.data);
-
-      // Convert AI response to our internal outfit format
-      const outfits = {};
-      const aiOutfits = parsedResult.data.dailyOutfits || [];
-
-      aiOutfits.forEach((dayOutfit, index) => {
-        const dayNum = index + 1;
-        outfits[dayNum] = {
-          id: `outfit-${trip.id}-${dayNum}`,
-          name: `Day ${dayNum} Outfit`,
-          day: dayNum,
-          tripId: trip.id,
-          occasion: dayOutfit.occasion || `Day ${dayNum}`,
-          items: {
-            topwear: dayOutfit.outfit.topwear || null,
-            bottomwear: dayOutfit.outfit.bottomwear || null,
-            footwear: dayOutfit.outfit.footwear || null,
-            outerwear: dayOutfit.outfit.outerwear || null,
-            accessories: dayOutfit.outfit.accessories || []
-          },
-          styling: dayOutfit.styling || {},
-          isSaved: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-      });
-
-      // Update trip with generated outfits
-      const tripWithOutfits = updateTrip(trip, {
-        outfits,
-        aiGenerationData: {
-          reusabilityAnalysis: parsedResult.data.reusabilityAnalysis,
-          constraints: parsedResult.data.constraints,
-          generatedAt: new Date().toISOString()
-        }
-      });
-
-      // Update the trips array
-      setTrips(prevTrips =>
-        prevTrips.map(t =>
-          t.id === trip.id ? tripWithOutfits : t
-        )
-      );
-
-      console.log('Outfits successfully generated and saved:', tripWithOutfits);
-
-    } catch (error) {
-      console.error('Error generating outfits:', error);
-
-      // Show error to user but don't break the flow
-      console.log('Creating fallback outfits due to error:', error.message);
-
-      // Create fallback outfits with sample data so the UI doesn't break
-      const fallbackOutfits = {};
-      const duration = trip.totalDays || 3;
-
-      for (let day = 1; day <= Math.min(duration, 5); day++) {
-        fallbackOutfits[day] = {
-          id: `outfit-${trip.id}-${day}`,
-          name: `Day ${day} Outfit`,
-          day: day,
-          tripId: trip.id,
-          occasion: `Day ${day} - ${trip.eventData?.occasion || 'Event'}`,
-          items: {
-            topwear: {
-              sku: "SKU001",
-              name: "Classic White T-Shirt",
-              category: "Topwear",
-              price: 25,
-              colors: "white",
-              weatherSuitability: "warm",
-              formality: "casual",
-              notes: "Essential lightweight cotton tee for everyday wear."
-            },
-            bottomwear: {
-              sku: "SKU002",
-              name: "Blue Denim Jeans",
-              category: "Bottomwear",
-              price: 60,
-              colors: "blue",
-              weatherSuitability: "mild",
-              formality: "casual",
-              notes: "Straight-fit jeans suitable for casual and semi-casual settings."
-            },
-            footwear: {
-              sku: "SKU012",
-              name: "Leather Dress Shoes",
-              category: "Footwear",
-              price: 130,
-              colors: "black",
-              weatherSuitability: "mild",
-              formality: "formal",
-              notes: "Classic lace-up oxfords for professional occasions."
-            },
-            outerwear: day === 1 ? {
-              sku: "SKU003",
-              name: "Black Blazer",
-              category: "Outerwear",
-              price: 120,
-              colors: "black",
-              weatherSuitability: "mild",
-              formality: "formal",
-              notes: "Tailored blazer ideal for business or formal occasions."
-            } : null,
-            accessories: []
-          },
-          styling: {
-            rationale: `This outfit combines professional styling with comfort for your ${trip.eventData?.occasion || 'event'}. The pieces work together to create a polished look.`,
-            weatherConsiderations: `Selected items suitable for ${trip.destination || 'your location'} weather conditions.`,
-            dresscodeCompliance: `This outfit meets ${trip.eventData?.dressCode || 'smart-casual'} dress code requirements.`
-          },
-          isSaved: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          fallback: true
-        };
-      }
-
-      // Update trip with fallback outfits
-      const tripWithFallback = updateTrip(trip, {
-        outfits: fallbackOutfits,
-        aiGenerationData: {
-          reusabilityAnalysis: {
-            totalItems: duration * 3,
-            reusedItems: Math.floor(duration * 1.5),
-            reusabilityPercentage: Math.round((Math.floor(duration * 1.5) / (duration * 3)) * 100),
-            reusabilityMap: {
-              "SKU003": [1, 2, 3].slice(0, duration),
-              "SKU002": duration > 1 ? [1, 3] : [1]
-            }
-          },
-          constraints: {
-            weather: 'Fallback outfit generation',
-            budget: 'No budget constraints applied',
-            dressCode: trip.eventData?.dressCode || 'smart-casual'
-          },
-          generatedAt: new Date().toISOString(),
-          fallback: true,
-          error: error.message
-        }
-      });
-
-      setTrips(prevTrips =>
-        prevTrips.map(t =>
-          t.id === trip.id ? tripWithFallback : t
-        )
-      );
-
-      console.log('Fallback outfits created:', tripWithFallback);
+    if (!generationResult.success) {
+      throw new Error(generationResult.error?.message || 'Failed to generate outfits');
     }
+
+    const tripWithOutfits = updateTrip(trip, {
+      outfits: generationResult.data.outfits,
+      aiGenerationData: {
+        reusabilityAnalysis: generationResult.data.reusabilityAnalysis,
+        generatedAt: generationResult.data.generatedAt,
+        contextSummary: generationResult.data.contextSummary,
+        fallback: false
+      }
+    });
+
+    setTrips(prevTrips =>
+      prevTrips.map(t =>
+        t.id === trip.id ? tripWithOutfits : t
+      )
+    );
+
+    console.log('Outfits successfully generated and saved:', tripWithOutfits);
   };
 
   return (
