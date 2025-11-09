@@ -28,7 +28,7 @@ const CombinedWorkshopPage = () => {
   const [processingError, setProcessingError] = useState(null);
   const [showConfirmationForm, setShowConfirmationForm] = useState(false);
   const [extractedEventData, setExtractedEventData] = useState(null);
-  const [savedSkus, setSavedSkus] = useState(() => new Set());
+  const [savedSkus, setSavedSkus] = useState(() => new Set(['005', '002', '006']));
   const seededCloset = useRef([
     {
       sku: 'CLOC001',
@@ -36,15 +36,17 @@ const CombinedWorkshopPage = () => {
       colors: 'charcoal',
       price: 0,
       category: 'topwear',
-      image: '/closet/Capture d’écran 2025-11-07 à 08.33.08.png'
+      image: '/closet/001.png'
     },
     {
       sku: 'CLOC002',
-      name: 'Retail GenAI Tee',
-      colors: 'black',
+      name: 'Casual Summer Top',
+      colors: 'multicolor',
       price: 0,
       category: 'topwear',
-      image: '/closet/Capture d’écran 2025-11-07 à 11.06.15.png'
+      image: '/closet/002.png',
+      formality: 'casual',
+      weatherSuitability: 'warm,hot'
     },
     {
       sku: 'CLOC003',
@@ -52,7 +54,7 @@ const CombinedWorkshopPage = () => {
       colors: 'cream',
       price: 0,
       category: 'topwear',
-      image: '/closet/Capture d’écran 2025-11-07 à 11.21.51.png'
+      image: '/closet/003.png'
     },
     {
       sku: 'CLOC004',
@@ -60,7 +62,7 @@ const CombinedWorkshopPage = () => {
       colors: 'camel',
       price: 0,
       category: 'accessories',
-      image: '/closet/Capture d’écran 2025-11-07 à 11.21.59.png'
+      image: '/closet/004.png'
     },
     {
       sku: 'CLOC005',
@@ -68,7 +70,7 @@ const CombinedWorkshopPage = () => {
       colors: 'white',
       price: 0,
       category: 'footwear',
-      image: '/closet/Capture d’écran 2025-11-07 à 11.32.40.png'
+      image: '/closet/005.png'
     },
     {
       sku: 'CLOC006',
@@ -76,10 +78,39 @@ const CombinedWorkshopPage = () => {
       colors: 'tan',
       price: 0,
       category: 'accessories',
-      image: '/closet/Capture d’écran 2025-11-07 à 11.33.18.png'
+      image: '/closet/006.png'
     }
   ]);
-  const [savedItems, setSavedItems] = useState(seededCloset.current);
+
+  // Initialize with demo closet items (for demo mode)
+  const demoClosetItems = [
+    {
+      sku: '005',
+      name: 'Pink Graphic Tee',
+      colors: 'pink',
+      price: 0,
+      category: 'topwear',
+      image: '/closet/005.png'
+    },
+    {
+      sku: '002',
+      name: 'Denim Shorts',
+      colors: 'blue',
+      price: 0,
+      category: 'bottomwear',
+      image: '/closet/002.png'
+    },
+    {
+      sku: '006',
+      name: 'Zebra Print Shoes',
+      colors: 'white-black',
+      price: 0,
+      category: 'footwear',
+      image: '/closet/006.png'
+    }
+  ];
+
+  const [savedItems, setSavedItems] = useState([...seededCloset.current, ...demoClosetItems]);
   const [showClosetInventory, setShowClosetInventory] = useState(false);
   const [showPackingList, setShowPackingList] = useState(false);
   const closetRef = useRef(null);
@@ -266,6 +297,7 @@ const CombinedWorkshopPage = () => {
       dailyPlans: trip.eventData?.dailyPlans || []
     });
 
+    // Pass closet items to outfit generation
     const generationResult = await outfitGenerationService.generateOutfits(trip.id, {
       duration: trip.totalDays || 3,
       occasion: trip.eventData?.occasion || trip.name || 'Trip',
@@ -275,7 +307,7 @@ const CombinedWorkshopPage = () => {
       dressCode: trip.eventData?.dressCode || 'smart-casual',
       budget: trip.eventData?.budget || null,
       dayPlans: trip.eventData?.dailyPlans || []
-    });
+    }, savedItems);
 
     if (!generationResult.success) {
       throw new Error(generationResult.error?.message || 'Failed to generate outfits');
@@ -326,6 +358,7 @@ const CombinedWorkshopPage = () => {
           onSaveItems={handleSaveItems}
           getClosetCenter={() => closetRef.current?.getClosetCenter?.()}
           dailyPlans={currentTrip.eventData?.dailyPlans}
+          onViewPackingList={() => setShowPackingList(true)}
         />
       );
     }
@@ -421,16 +454,7 @@ const CombinedWorkshopPage = () => {
                 </div>
               </>
             ) : (
-              <>
-                {renderMiddleColumn()}
-                {hasGeneratedOutfits && (
-                  <div className="finalize-bar">
-                    <button className="finalize-btn" onClick={() => setShowPackingList(true)}>
-                      View packing list →
-                    </button>
-                  </div>
-                )}
-              </>
+              renderMiddleColumn()
             )}
           </div>
         </section>
@@ -493,17 +517,41 @@ const CombinedWorkshopPage = () => {
 
 const getSkuImagePath = (sku) => {
   if (!sku) return null;
-  const match = sku.match(/SKU(\d+)/i);
-  if (match) {
-    const imageNumber = match[1].padStart(3, '0');
+
+  // Handle demo items (D###)
+  const demoMatch = sku.match(/^D(\d+)$/i);
+  if (demoMatch) {
+    const imageNumber = demoMatch[1].padStart(3, '0');
+    return `/demo/D${imageNumber}.png`;
+  }
+
+  // Handle plain numbers for closet items (005, 002, etc.)
+  const plainNumberMatch = sku.match(/^(\d+)$/);
+  if (plainNumberMatch) {
+    const imageNumber = plainNumberMatch[1].padStart(3, '0');
+    return `/closet/${imageNumber}.png`;
+  }
+
+  // Handle catalog SKUs (SKU###)
+  const catalogMatch = sku.match(/SKU(\d+)/i);
+  if (catalogMatch) {
+    const imageNumber = catalogMatch[1].padStart(3, '0');
     return `/Images/${imageNumber}.png`;
   }
+
+  // Handle closet SKUs (CLOC###)
+  const closetMatch = sku.match(/CLOC(\d+)/i);
+  if (closetMatch) {
+    const imageNumber = closetMatch[1].padStart(3, '0');
+    return `/closet/${imageNumber}.png`;
+  }
+
   return null;
 };
 
 export default CombinedWorkshopPage;
 const summarizePackingList = (trip, savedSkus) => {
-  if (!trip?.outfits) return { items: [], totals: { closet: 0, catalog: 0, price: 0 } };
+  if (!trip?.outfits) return { items: [], totals: { closet: 0, catalog: 0, price: 0, reused: 0 } };
 
   const seen = new Map();
   Object.values(trip.outfits).forEach(outfit => {
@@ -529,11 +577,22 @@ const summarizePackingList = (trip, savedSkus) => {
   let closet = 0;
   let catalog = 0;
   let price = 0;
+  let reused = 0;
   const items = Array.from(seen.values()).map(entry => {
-    const fromCloset = savedSkus.has(entry.sku);
-    if (fromCloset) closet += 1; else catalog += 1;
-    const numericPrice = entry.price ? Number(entry.price) : 0;
-    price += numericPrice;
+    // Check if item is from closet (either saved or has CLOC SKU prefix)
+    const fromCloset = savedSkus.has(entry.sku) || entry.sku?.startsWith('CLOC');
+    if (fromCloset) {
+      closet += 1;
+    } else {
+      catalog += 1;
+      // Only add price for catalog items (closet items are free)
+      const numericPrice = entry.price ? Number(entry.price) : 0;
+      price += numericPrice;
+    }
+    // Count reused items (worn more than once)
+    if (entry.count > 1) {
+      reused += 1;
+    }
     return {
       ...entry,
       types: Array.from(entry.types),
@@ -546,7 +605,8 @@ const summarizePackingList = (trip, savedSkus) => {
     totals: {
       closet,
       catalog,
-      price: Math.round(price)
+      price: Math.round(price),
+      reused
     }
   };
 };
@@ -578,27 +638,48 @@ const PackingList = ({ trip, savedSkus, savedItems }) => {
           <strong>{data.totals.catalog}</strong>
         </div>
         <div>
+          <h4>Reused</h4>
+          <strong>{data.totals.reused}</strong>
+        </div>
+        <div>
           <h4>Est. cost</h4>
           <strong>${data.totals.price}</strong>
         </div>
       </div>
       <div className="packing-grid">
-        {data.items.map(item => (
-          <div key={item.sku} className="packing-card">
-            <div className="packing-image">
-              <img src={getSkuImagePath(item.sku)} alt={item.name} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
-              <div className="packing-image-fallback">{item.name?.[0]}</div>
+        {data.items.map(item => {
+          // Use item.image for closet items, fallback to SKU path for catalog items
+          const imageSrc = item.image || getSkuImagePath(item.sku);
+          const hasProductLink = !item.fromCloset && item.productUrl;
+
+          return (
+            <div key={item.sku} className="packing-card">
+              <div className="packing-image">
+                <img src={imageSrc} alt={item.name} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                <div className="packing-image-fallback">{item.name?.[0]}</div>
+              </div>
+              <div className="packing-meta">
+                <strong>{item.name}</strong>
+                {item.colors && <span>{item.colors}</span>}
+                <span className="packing-tags">{item.types.join(', ')}</span>
+                {hasProductLink ? (
+                  <a
+                    href={item.productUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="packing-source catalog product-link"
+                  >
+                    Add to cart →
+                  </a>
+                ) : (
+                  <span className={`packing-source ${item.fromCloset ? 'closet' : 'catalog'}`}>
+                    {item.fromCloset ? 'In closet' : 'Add to cart'}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="packing-meta">
-              <strong>{item.name}</strong>
-              {item.colors && <span>{item.colors}</span>}
-              <span className="packing-tags">{item.types.join(', ')}</span>
-              <span className={`packing-source ${item.fromCloset ? 'closet' : 'catalog'}`}>
-                {item.fromCloset ? 'In closet' : 'Add to cart'}
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

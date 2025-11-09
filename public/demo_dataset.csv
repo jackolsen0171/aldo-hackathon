@@ -1,0 +1,17 @@
+sku,name,category,price,colors,weatherSuitability,formality,layering,tags,notes,image,productUrl
+005,Pink Graphic Tee,topwear,45,pink,warm,casual,base,tshirt casual summer,Casual pink graphic t-shirt,/closet/005.png,
+002,Denim Shorts,bottomwear,55,blue,warm,casual,base,shorts denim summer,High-waisted denim shorts,/closet/002.png,
+006,Zebra Print Shoes,footwear,120,white-black,warm,casual,none,zebra pattern statement,Bold zebra print heels,/closet/006.png,
+001,ALDO Hackathon Hoodie,topwear,0,charcoal,mild,casual,outer,hoodie comfort,Comfortable hoodie,/closet/001.png,
+003,Knit Sweater,topwear,65,cream,mild,casual,mid,sweater cozy,Comfort knit sweater,/closet/003.png,
+004,Tote Bag,accessories,85,camel,all,casual,none,bag everyday,Everyday tote bag,/closet/004.png,
+D001,Black Sneakers,footwear,95,black,all,casual,none,sneakers comfortable,Comfortable black sneakers,/demo/D001.png,
+D002,Brown Sequin Dress,dress,120,brown,warm,smart-casual,base,dress sequin evening,Sequin halter neck dress,/demo/D002.png,
+D003,Gold Bangles,accessories,35,gold,all,smart-casual,none,jewelry bangles,Driracia gold bangles,/demo/D003.png,https://www.aldoshoes.com/en-ca/products/driracia-gold
+D004,White Bag,accessories,95,white,all,smart-casual,none,bag handbag,Timberlyy black bag,/demo/D004.png,
+D005,Little Hoops,accessories,28,gold,all,smart-casual,none,jewelry earrings,Variety gold hoops,/demo/D005.png,https://www.aldoshoes.com/en-ca/products/variety-gold
+D006,Gold Necklace,accessories,45,gold,all,smart-casual,none,jewelry necklace,Indrois gold necklace,/demo/D006.png,https://www.aldoshoes.com/en-ca/products/indrois-gold
+D007,Black Bag,accessories,95,black,all,smart-casual,none,bag handbag,Timberlyy black bag,/demo/D007.png,https://www.aldoshoes.com/en-ca/products/timberlyy-black
+D008,Brown Sunglasses,accessories,65,brown,all,casual,none,sunglasses eyewear,Etelarien sunglasses,/demo/D008.png,https://www.aldoshoes.com/en-ca/products/etelarien-other-brown
+D009,Brown Heels,footwear,130,brown,warm,smart-casual,none,heels formal,Anyabrilden dark brown heels,/demo/D009.png,https://www.aldoshoes.com/en-ca/products/anyabrilden-dark-brown-14089170
+

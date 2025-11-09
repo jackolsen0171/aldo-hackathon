@@ -13,11 +13,35 @@ const ORDERED_MAIN_CATEGORIES = ['topwear', 'outerwear', 'bottomwear', 'footwear
 
 const getSkuImagePath = (sku) => {
     if (!sku) return null;
-    const match = sku.match(/SKU(\d+)/i);
-    if (match) {
-        const imageNumber = match[1].padStart(3, '0');
+
+    // Handle demo items (D###)
+    const demoMatch = sku.match(/^D(\d+)$/i);
+    if (demoMatch) {
+        const imageNumber = demoMatch[1].padStart(3, '0');
+        return `/demo/D${imageNumber}.png`;
+    }
+
+    // Handle plain numbers for closet items (005, 002, etc.)
+    const plainNumberMatch = sku.match(/^(\d+)$/);
+    if (plainNumberMatch) {
+        const imageNumber = plainNumberMatch[1].padStart(3, '0');
+        return `/closet/${imageNumber}.png`;
+    }
+
+    // Handle catalog SKUs (SKU###)
+    const catalogMatch = sku.match(/SKU(\d+)/i);
+    if (catalogMatch) {
+        const imageNumber = catalogMatch[1].padStart(3, '0');
         return `/Images/${imageNumber}.png`;
     }
+
+    // Handle closet SKUs (CLOC###)
+    const closetMatch = sku.match(/CLOC(\d+)/i);
+    if (closetMatch) {
+        const imageNumber = closetMatch[1].padStart(3, '0');
+        return `/closet/${imageNumber}.png`;
+    }
+
     return null;
 };
 
@@ -58,9 +82,10 @@ const getItemRationale = (stylingNotes, category, item) => {
 const OutfitCardCarousel = ({
     trip,
     savedSkus = new Set(),
-    onSaveItems = () => {},
+    onSaveItems = () => { },
     getClosetCenter = () => ({ x: 0, y: 0 }),
-    dailyPlans = []
+    dailyPlans = [],
+    onViewPackingList = null
 }) => {
     const outfits = useMemo(() => {
         if (!trip?.outfits) {
@@ -135,34 +160,34 @@ const OutfitCardCarousel = ({
                 <details className="category-details" open>
                     <summary>Clothing</summary>
                     <div className="carousel-items scrollable-grid">
-                    {ORDERED_MAIN_CATEGORIES.map(category => {
-                        const item = outfitItems[category];
-                        if (!item) return null;
+                        {ORDERED_MAIN_CATEGORIES.map(category => {
+                            const item = outfitItems[category];
+                            if (!item) return null;
 
-                        return (
-                            <OutfitImageCard
-                                key={category}
-                                category={category}
-                                item={item}
-                                rationale={getItemRationale(currentOutfit.styling?.rationale, category, item)}
-                                saved={savedSkus.has(item.sku)}
-                                onSave={() => item?.sku && !savedSkus.has(item.sku) && onSaveItems([item])}
-                                getClosetCenter={getClosetCenter}
-                            />
-                        );
-                    })}
+                            return (
+                                <OutfitImageCard
+                                    key={category}
+                                    category={category}
+                                    item={item}
+                                    rationale={getItemRationale(currentOutfit.styling?.rationale, category, item)}
+                                    saved={savedSkus.has(item.sku)}
+                                    onSave={() => item?.sku && !savedSkus.has(item.sku) && onSaveItems([item])}
+                                    getClosetCenter={getClosetCenter}
+                                />
+                            );
+                        })}
                     </div>
                 </details>
 
                 {accessories.length > 0 && (
-                    <details className="accessories-block" open>
+                    <details className="accessories-block">
                         <summary className="chip-label">Accessories</summary>
                         <div className="accessories-grid scrollable-grid">
                             {accessories.map((accessory, idx) => (
                                 <div key={`${accessory.sku || idx}`} className="accessory-card">
                                     <div className="accessory-image">
                                         <img
-                                            src={getSkuImagePath(accessory.sku)}
+                                            src={accessory.image || getSkuImagePath(accessory.sku)}
                                             alt={accessory.name}
                                             onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                                         />
@@ -185,12 +210,19 @@ const OutfitCardCarousel = ({
             </div>
 
             <div className="carousel-controls">
-                <button className="control-btn" onClick={showPrev} aria-label="Previous outfit">
-                    ←
-                </button>
-                <button className="control-btn" onClick={showNext} aria-label="Next outfit">
-                    →
-                </button>
+                <div className="nav-buttons">
+                    <button className="control-btn" onClick={showPrev} aria-label="Previous outfit">
+                        ←
+                    </button>
+                    <button className="control-btn" onClick={showNext} aria-label="Next outfit">
+                        →
+                    </button>
+                </div>
+                {onViewPackingList && (
+                    <button className="control-btn packing-btn" onClick={onViewPackingList}>
+                        View packing list →
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -199,7 +231,8 @@ const OutfitCardCarousel = ({
 export default OutfitCardCarousel;
 
 const OutfitImageCard = ({ category, item, rationale, saved, onSave, getClosetCenter }) => {
-    const imageUrl = getSkuImagePath(item.sku);
+    // Use item.image for closet items, fallback to SKU path for catalog items
+    const imageUrl = item.image || getSkuImagePath(item.sku);
     const label = CATEGORY_LABELS[category] || category;
     const [animating, setAnimating] = useState(false);
     const [freezeFlip, setFreezeFlip] = useState(false);

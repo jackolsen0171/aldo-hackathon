@@ -8,6 +8,7 @@ import contextAccumulator from './contextAccumulator';
 import clothingDatasetService from './clothingDatasetService';
 import bedrockService from './bedrockService';
 import csvLoader from './CSVLoader';
+import demoOutfitService from './demoOutfitService';
 
 class OutfitGenerationService {
     constructor() {
@@ -18,24 +19,39 @@ class OutfitGenerationService {
      * Main orchestration method for generating outfits
      * @param {string} sessionId - Session identifier
      * @param {Object} confirmedDetails - User-confirmed event details
+     * @param {Array} closetItems - User's existing closet items (optional)
      * @returns {Promise<Object>} Generated outfit recommendations
      */
-    async generateOutfits(sessionId, confirmedDetails) {
+    async generateOutfits(sessionId, confirmedDetails, closetItems = []) {
         try {
             this.validateInputs(sessionId, confirmedDetails);
 
-            const dataset = await clothingDatasetService.getDataset();
-
+            // Check if we should use demo mode
             const contextFile = contextAccumulator.getContextFile(sessionId);
             if (!contextFile) {
                 throw new Error('Context file not found for session');
             }
 
+            const originalMessage = contextFile?.userInput?.originalMessage || '';
+            console.log('🎬 Checking demo mode for message:', originalMessage);
+
+            if (demoOutfitService.isDemoMode(originalMessage)) {
+                console.log('🎬 DEMO MODE ACTIVATED - Using predefined outfits from demo.md');
+                return await demoOutfitService.generateDemoOutfits(sessionId, confirmedDetails);
+            }
+
+            console.log('🎬 Demo mode not detected, using AI generation');
+
+            const dataset = await clothingDatasetService.getDataset();
+
+            // Merge closet items with catalog dataset
+            const mergedDataset = this.mergeClosetItems(dataset, closetItems);
+
             const contextSummary = contextAccumulator.generateContextSummary(sessionId);
 
             const aiResult = await bedrockService.generateOutfitRecommendations({
                 eventDetails: confirmedDetails,
-                csvContent: dataset.csvContent,
+                csvContent: mergedDataset.csvContent,
                 contextSummary
             });
 
@@ -43,7 +59,7 @@ class OutfitGenerationService {
                 throw new Error(aiResult.error?.message || 'AI outfit generation failed');
             }
 
-            const hydratedOutfits = this.hydrateOutfits(aiResult.data, dataset.skuMap, sessionId);
+            const hydratedOutfits = this.hydrateOutfits(aiResult.data, mergedDataset.skuMap, sessionId);
             const reusabilityAnalysis = aiResult.data.reusabilityAnalysis ||
                 this.calculateReusabilityMetrics(hydratedOutfits);
 
@@ -68,6 +84,38 @@ class OutfitGenerationService {
                 }
             };
         }
+    }
+
+    /**
+     * Merge closet items into the dataset
+     * @param {Object} dataset - Original catalog dataset
+     * @param {Array} closetItems - User's closet items
+     * @returns {Object} Merged dataset with closet items
+     */
+    mergeClosetItems(dataset, closetItems) {
+        if (!closetItems || closetItems.length === 0) {
+            return dataset;
+        }
+
+        // Create a new SKU map with closet items
+        const mergedSkuMap = new Map(dataset.skuMap);
+
+        // Convert closet items to CSV rows and add to SKU map
+        const closetRows = closetItems.map(item => {
+            // Add to SKU map
+            mergedSkuMap.set(item.sku, item);
+
+            // Convert to CSV row format
+            return `${item.sku},${item.name},${item.category},${item.price || 0},${item.colors || ''},${item.weatherSuitability || 'all-weather'},${item.formality || 'casual'},${item.layering || ''},${item.tags || ''},${item.notes || ''}`;
+        }).join('\n');
+
+        // Prepend closet items to CSV content (so they appear first and are prioritized)
+        const mergedCsvContent = closetRows + '\n' + dataset.csvContent;
+
+        return {
+            csvContent: mergedCsvContent,
+            skuMap: mergedSkuMap
+        };
     }
 
     hydrateOutfits(aiData, skuMap, sessionId) {

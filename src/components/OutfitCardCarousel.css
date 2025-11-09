@@ -336,7 +336,13 @@
 
 .carousel-controls {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-buttons {
+    display: flex;
     gap: 12px;
 }
 
@@ -350,6 +356,14 @@
     font-size: 1.2rem;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.control-btn.packing-btn {
+    width: auto;
+    padding: 0 24px;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .control-btn:hover {

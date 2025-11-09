@@ -207,7 +207,7 @@ class BedrockService {
             thisWeekend: DATE_PARSING_EXAMPLES['this weekend']()
         };
 
-        return `You are an expert event planner. The user identifies as male, so interpret pronouns and context accordingly. Extract structured information from the user's event description. When the user mentions multiple days or activities, infer a per-day plan.
+        return `You are an expert event planner. The user identifies as female, so interpret pronouns and context accordingly. Extract structured information from the user's event description. When the user mentions multiple days or activities, infer a per-day plan.
 
 User input: "${userMessage}"
 
@@ -573,14 +573,18 @@ Respond with ONLY the JSON object, no additional text or formatting.`;
             location,
             dressCode,
             budget,
-            userGender: 'male',
+            userGender: 'female',
             dayPlans,
             weather: contextSummary?.environment?.weather || null,
             weatherConstraints: contextSummary?.weatherConstraints || null,
             specialRequirements: contextSummary?.style?.specialRequirements || []
         };
 
-        return `You are an expert travel stylist. Using the clothing catalog below, create ${duration} complete daily outfits for the described trip. The traveler is male, so select menswear SKUs and male-appropriate styling. You must select items ONLY by SKU from the CSV table—do not invent new products. Follow the dayPlans array to tailor each day’s outfit.
+        return `You are an expert travel stylist specializing in women's fashion. Using the clothing catalog below, create ${duration} complete daily outfits for the described trip. The traveler is female, so select women's SKUs and female-appropriate styling. 
+
+**IMPORTANT**: PRIORITIZE items from her existing closet (SKUs starting with "CLOC") before recommending catalog purchases. Only suggest catalog items (SKUs starting with "SKU") when closet items are insufficient or inappropriate for the occasion.
+
+You must select items ONLY by SKU from the CSV table—do not invent new products. Follow the dayPlans array to tailor each day's outfit.
 
 TRIP CONTEXT:
 ${JSON.stringify(promptContext, null, 2)}

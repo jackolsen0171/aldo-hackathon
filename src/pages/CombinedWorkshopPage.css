@@ -586,6 +586,8 @@
   border: 1px solid var(--aldo-outline);
   padding: 16px;
   overflow: hidden;
+  max-height: 100%;
+  min-height: 0;
 }
 
 .packing-summary {
@@ -616,6 +618,8 @@
   overflow-y: auto;
   padding-right: 4px;
   position: relative;
+  max-height: 450px;
+  min-height: 0;
 }
 
 .packing-grid::after {
@@ -684,4 +688,21 @@
 
 .packing-source.catalog {
   color: #c0392b;
+}
+
+.packing-source.product-link {
+  display: inline-block;
+  text-decoration: none;
+  padding: 6px 12px;
+  background: var(--aldo-red);
+  color: white;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.packing-source.product-link:hover {
+  background: #b8312a;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.3);
 }
